@@ -9,13 +9,27 @@ const inicio = window.__TUNA__ ?? { ajustes: {}, version: "0.1.0" };
 export const enTauri = "__TAURI_INTERNALS__" in window;
 export const version = inicio.version;
 
+export const ATAJOS = { buscar: "Ctrl+F", todas: "Ctrl+A", alternar: "Space" };
+
 const POR_DEFECTO = {
   // null = el de Windows la primera vez; luego, el que elijas.
   tema: null,
   idioma: "es",
+  // usuario | todos (pide permisos)
+  instalarPara: "usuario",
+  // instaladas | favoritas
+  alAbrir: "instaladas",
+  // Fuentes del sistema desbloqueadas (las imprescindibles, nunca).
+  desbloqueadas: false,
+  // Texto de prueba por defecto ("" = el de siempre del idioma).
+  textoPrueba: "",
+  atajos: { ...ATAJOS },
+  vista: "lista",
+  tamano: 30,
 };
 
 export const ajustes = $state({ ...POR_DEFECTO, ...inicio.ajustes });
+ajustes.atajos = { ...ATAJOS, ...(ajustes.atajos || {}) };
 
 // Tema que se ve ahora mismo (resuelve el null con el de Windows).
 const oscuroSistema = matchMedia("(prefers-color-scheme: dark)");
@@ -30,7 +44,7 @@ $effect.root(() => {
   // Cada ajuste que cambia se guarda; el plugin agrupa las escrituras seguidas.
   for (const clave of Object.keys(POR_DEFECTO)) {
     $effect(() => {
-      const valor = ajustes[clave];
+      const valor = $state.snapshot(ajustes[clave]);
       store?.set(clave, valor);
     });
   }

@@ -1,29 +1,56 @@
 <script>
   import { SlidersHorizontal, Sun, Moon } from "@lucide/svelte";
   import Segmentado from "./Segmentado.svelte";
-  import { ajustes, temaActual, ponerTema, version } from "../lib/ajustes.svelte.js";
+  import { temaActual, ponerTema, version } from "../lib/ajustes.svelte.js";
+  import { arrastre } from "../lib/arrastre.svelte.js";
   import { t } from "../lib/i18n.svelte.js";
 
-  // seccion: instaladas | descubrir | favoritas. cat: null o la categoría.
-  let { seccion, cat, onseccion, oncat, onajustes, onacerca } = $props();
+  // seccion: instaladas | descubrir | favoritas | col:<id> | car:<ruta>
+  let {
+    seccion, cat, cuentas, catCuentas, colecciones, carpetas, pie, renombrando = $bindable(),
+    onseccion, oncat, onnueva, onrenombrar, onanadirCarpeta, onajustes, onacerca,
+  } = $props();
 
   const CATEGORIAS = ["sans", "serif", "script", "display", "mono", "otros"];
 
-  const grupos = $derived([
-    {
-      etiqueta: t("grupo.biblioteca"),
-      items: [
-        { id: "instaladas", texto: t("sec.instaladas"), activo: seccion === "instaladas", ir: () => onseccion("instaladas") },
-        { id: "descubrir", texto: t("sec.descubrir"), activo: seccion === "descubrir", ir: () => onseccion("descubrir") },
-        { id: "favoritas", texto: t("sec.favoritas"), activo: seccion === "favoritas", ir: () => onseccion("favoritas"), rojo: true },
-      ],
-    },
-    {
-      etiqueta: t("grupo.categorias"),
-      items: CATEGORIAS.map((c) => ({ id: c, texto: t("cat." + c), activo: cat === c, ir: () => oncat(cat === c ? null : c) })),
-    },
-  ]);
+  let borrador = $state("");
+  let campo = $state();
+
+  $effect(() => {
+    if (renombrando && campo) {
+      borrador = colecciones.find((c) => c.id === renombrando)?.nombre ?? "";
+      campo.focus();
+      campo.select();
+    }
+  });
+
+  function terminar(guardar) {
+    if (guardar) onrenombrar(renombrando, borrador);
+    renombrando = null;
+  }
 </script>
+
+{#snippet item(texto, activo, ir, cuenta, extra = {})}
+  <button
+    type="button"
+    class="item"
+    class:activo
+    class:diana={extra.diana}
+    onclick={ir}
+    ondblclick={extra.doble}
+    title={extra.titulo}
+    data-coleccion={extra.coleccion}
+    aria-current={activo ? "page" : undefined}
+  >
+    {#if extra.mas}
+      <span class="mas">+</span>
+    {:else}
+      <span class="punto" class:rojo={extra.rojo}></span>
+    {/if}
+    <span class="texto">{texto}</span>
+    {#if cuenta != null && cuenta !== ""}<span class="cuenta num">{cuenta}</span>{/if}
+  </button>
+{/snippet}
 
 <aside>
   <div class="cabeza" data-tauri-drag-region>
@@ -32,21 +59,59 @@
   </div>
 
   <nav>
-    {#each grupos as g (g.etiqueta)}
-      <div class="grupo">
-        <span class="titulo">{g.etiqueta}</span>
-        {#each g.items as it (it.id)}
-          <button type="button" class="item" class:activo={it.activo} onclick={it.ir} aria-current={it.activo ? "page" : undefined}>
-            <span class="punto" class:rojo={it.rojo}></span>
-            <span class="texto">{it.texto}</span>
-            {#if it.cuenta != null}<span class="cuenta num">{it.cuenta}</span>{/if}
-          </button>
-        {/each}
-      </div>
-    {/each}
+    <div class="grupo">
+      <span class="titulo">{t("grupo.biblioteca")}</span>
+      {@render item(t("sec.instaladas"), seccion === "instaladas", () => onseccion("instaladas"), cuentas.instaladas)}
+      {@render item(t("sec.descubrir"), seccion === "descubrir", () => onseccion("descubrir"), cuentas.descubrir)}
+      {@render item(t("sec.favoritas"), seccion === "favoritas", () => onseccion("favoritas"), cuentas.favoritas, { rojo: true })}
+    </div>
+
+    <div class="grupo">
+      <span class="titulo">{t("grupo.colecciones")}</span>
+      {#each colecciones as c (c.id)}
+        {#if renombrando === c.id}
+          <input
+            class="renombrar"
+            bind:this={campo}
+            bind:value={borrador}
+            onkeydown={(e) => {
+              if (e.key === "Enter") terminar(true);
+              if (e.key === "Escape") (e.stopPropagation(), terminar(false));
+            }}
+            onblur={() => terminar(true)}
+          />
+        {:else}
+          {@render item(c.nombre, seccion === "col:" + c.id, () => onseccion("col:" + c.id), c.fuentes.length, {
+            doble: () => (renombrando = c.id),
+            coleccion: c.id,
+            diana: arrastre.activo && arrastre.sobre === c.id,
+            titulo: t("col.pista"),
+          })}
+        {/if}
+      {/each}
+      {@render item(t("col.nueva"), false, onnueva, "", { mas: true })}
+    </div>
+
+    <div class="grupo">
+      <span class="titulo">{t("grupo.carpetas")}</span>
+      {#each carpetas as c (c.ruta)}
+        {@render item(c.nombre, seccion === "car:" + c.ruta, () => onseccion("car:" + c.ruta), c.cuenta, { titulo: c.ruta })}
+      {/each}
+      {#if !carpetas.length}
+        {@render item(t("car.anadir"), false, onanadirCarpeta, "", { mas: true })}
+      {/if}
+    </div>
+
+    <div class="grupo">
+      <span class="titulo">{t("grupo.categorias")}</span>
+      {#each CATEGORIAS as c (c)}
+        {@render item(t("cat." + c), cat === c, () => oncat(cat === c ? null : c), catCuentas[c] ?? 0)}
+      {/each}
+    </div>
   </nav>
 
   <div class="pie">
+    <span class="nota num">{pie}</span>
     <div class="fila">
       <button type="button" class="ajustes" onclick={onajustes}>
         <SlidersHorizontal size={15} strokeWidth={1.9} />{t("settings")}
@@ -77,32 +142,13 @@
     padding: 0 10px 14px;
     transition: background-color 0.3s;
   }
-  .cabeza {
-    flex: none;
-    height: 52px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 0 8px;
-  }
+  .cabeza { flex: none; height: 52px; display: flex; align-items: center; gap: 8px; padding: 0 8px; }
   .cabeza img { display: block; flex: none; }
-  .cabeza .marca {
-    display: flex;
-    align-items: center;
-    height: 24px;
-    font-size: 18px;
-    transform: translateY(1px);
-  }
-  nav { flex: 1 1 auto; min-height: 0; overflow-y: auto; margin: 0 -4px; padding: 0 4px; }
+  .cabeza .marca { display: flex; align-items: center; height: 24px; font-size: 18px; transform: translateY(1px); }
+  nav { flex: 1 1 auto; min-height: 0; overflow-y: auto; margin: 0 -6px; padding: 0 6px 6px; }
   .grupo { display: flex; flex-direction: column; gap: 1px; margin-top: 14px; }
-  .titulo {
-    padding: 0 10px 6px;
-    font-size: 10.5px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--ink3);
-  }
+  .grupo:first-child { margin-top: 2px; }
+  .titulo { padding: 0 10px 6px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink3); }
   .item {
     display: flex;
     align-items: center;
@@ -115,23 +161,31 @@
     color: var(--ink2);
     font: 500 13px var(--sans);
     text-align: left;
-    transition: background-color 0.15s, color 0.15s;
+    transition: background-color 0.15s, color 0.15s, box-shadow 0.15s;
   }
   .item:hover { background: var(--hov); }
   .item.activo { background: var(--chip); color: var(--ink); font-weight: 600; }
-  .punto {
-    width: 7px;
-    height: 7px;
-    flex: none;
-    border-radius: 50%;
-    box-shadow: inset 0 0 0 1.5px var(--line2);
-  }
+  .item.diana { box-shadow: inset 0 0 0 1.5px var(--red); }
+  .punto { width: 7px; height: 7px; flex: none; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--line2); }
   .activo .punto { background: var(--ink); box-shadow: none; }
   .activo .punto.rojo { background: var(--red); }
+  .mas { width: 7px; flex: none; text-align: center; font-size: 14px; line-height: 1; color: var(--ink3); }
   .texto { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 1px; }
   .cuenta { margin-left: auto; font-size: 11.5px; color: var(--ink3); }
-
+  .renombrar {
+    height: 30px;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 6px;
+    background: var(--field);
+    box-shadow: 0 0 0 1.5px var(--red);
+    font: 600 13px var(--sans);
+    color: var(--ink);
+    outline: 0;
+    width: 100%;
+  }
   .pie { flex: none; display: flex; flex-direction: column; gap: 10px; padding: 10px 4px 0; }
+  .nota { font-size: 11.5px; color: var(--ink3); padding: 0 6px; }
   .fila { display: flex; align-items: center; gap: 6px; }
   .ajustes {
     flex: 1;
@@ -148,14 +202,6 @@
     transition: background-color 0.15s, color 0.15s;
   }
   .ajustes:hover { background: var(--hov); color: var(--ink); }
-  .version {
-    align-self: flex-start;
-    padding: 0 6px;
-    border: 0;
-    background: transparent;
-    color: var(--ink3);
-    font: 500 11px var(--mono);
-    transition: color 0.15s;
-  }
+  .version { align-self: flex-start; padding: 0 6px; border: 0; background: transparent; color: var(--ink3); font: 500 11px var(--mono); transition: color 0.15s; }
   .version:hover { color: var(--ink); }
 </style>
