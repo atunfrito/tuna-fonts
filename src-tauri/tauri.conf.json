@@ -49,6 +49,11 @@
         "installerIcon": "icons/icon.ico",
         "compression": "lzma"
       }
+    },
+    "resources": {
+      "../LICENSE": "LICENSE.txt",
+      "../THIRD-PARTY-NOTICES.md": "THIRD-PARTY-NOTICES.md",
+      "../licenses/*": "licenses/"
     }
   }
 }

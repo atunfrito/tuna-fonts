@@ -21,7 +21,9 @@ export function cargarCatalogo(forzar = false) {
   descubrir.error = "";
   pedido = import("@tauri-apps/api/core")
     .then(({ invoke }) => invoke("google_catalogo", { forzar }))
-    .then((l) => (descubrir.lista = l))
+    .then((l) => {
+      descubrir.lista = l;
+    })
     .catch((e) => {
       descubrir.error = String(e);
       pedido = null;

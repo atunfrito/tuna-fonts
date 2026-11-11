@@ -21,25 +21,12 @@ async function llamar(cmd, args) {
   return invocar(cmd, args);
 }
 
-// Las que Windows ya tenía cargadas al abrir: esas se pintan por su nombre,
-// sin cargar nada. Las demás (desactivadas, de carpetas, recién instaladas)
-// se pintan desde su archivo.
-let vistasAlAbrir = null;
+// Cada cara se pinta con un @font-face propio: primero local("nombre completo")
+// (la fuente instalada, sin cargar nada) y, si Windows no la tiene (desactivada,
+// de carpeta, recién instalada), su archivo. Así sale siempre la cara exacta,
+// cosa que pedirla por familia no garantiza.
 const caras = new Map();
 let convertir = null;
-
-function registrarCara(f) {
-  if (caras.has(f.archivo)) return caras.get(f.archivo);
-  const id = "tf" + caras.size;
-  caras.set(f.archivo, id);
-  if (convertir) {
-    const url = convertir(f.archivo);
-    const e = f.estilos[0];
-    const regla = `@font-face{font-family:"${id}";src:url("${url}");font-display:block;font-weight:${e?.peso ?? 400};font-style:${e?.cursiva ? "italic" : "normal"};}`;
-    hoja().insertRule(regla, hoja().cssRules.length);
-  }
-  return id;
-}
 
 let _hoja = null;
 function hoja() {
@@ -51,26 +38,30 @@ function hoja() {
   return _hoja;
 }
 
-const css = (n) => `"${n.replace(/"/g, "")}"`;
+const css = (n) => `"${String(n).replace(/["\\]/g, "")}"`;
+
+function cara(e, local) {
+  const k = e.archivo + "|" + e.completo + "|" + local;
+  if (caras.has(k)) return caras.get(k);
+  const id = "tf" + caras.size;
+  caras.set(k, id);
+  const src = [];
+  if (local && e.completo) src.push(`local(${css(e.completo)})`);
+  if (convertir) src.push(`url("${convertir(e.archivo)}")`);
+  if (src.length) hoja().insertRule(`@font-face{font-family:"${id}";src:${src.join(",")};font-display:block;}`, hoja().cssRules.length);  return id;
+}
 
 /** font-family (y peso/estilo) para pintar la vista previa de una familia. */
 export function estiloDe(f, estilo = null) {
   const e = estilo ?? f.estilos[0];
-  const local = f.activa && f.origen !== "car" && vistasAlAbrir?.has(f.nombre);
-  const familia = local
-    ? `${css(f.nombre)}, ${css(e?.familia_win ?? f.nombre)}, var(--sans)`
-    : `${css(registrarCaraDe(f, e))}, var(--sans)`;
-  return { familia, peso: e?.peso ?? 400, cursiva: !!e?.cursiva };
-}
-
-function registrarCaraDe(f, e) {
-  if (!e || e.archivo === f.archivo) return registrarCara(f);
-  return registrarCara({ ...f, archivo: e.archivo, estilos: [e] });
+  if (!e) return { familia: `${css(f.nombre)}, var(--sans)`, peso: 400, cursiva: false };
+  // Las de carpetas y las desactivadas no están en Windows: directamente el archivo.
+  const local = f.activa && f.origen !== "car";
+  return { familia: `${css(cara(e, local))}, ${css(e.familia_win)}, var(--sans)`, peso: e.peso, cursiva: e.cursiva };
 }
 
 function poner(lista) {
   fuentes.lista = lista;
-  if (!vistasAlAbrir) vistasAlAbrir = new Set(lista.filter((f) => f.activa && f.origen !== "car").map((f) => f.nombre));
   fuentes.cargando = false;
   fuentes.esqueleto = false;
 }
@@ -173,7 +164,7 @@ export { llamar };
 function demo(cmd) {
   const fam = (nombre, categoria, origen, activa) => ({
     nombre, categoria, origen, activa, imprescindible: ["Arial", "Segoe UI", "Consolas"].includes(nombre),
-    estilos: [{ nombre: "Regular", peso: 400, cursiva: false, archivo: nombre, familia_win: nombre }],
+    estilos: [{ nombre: "Regular", peso: 400, cursiva: false, archivo: nombre, familia_win: nombre, completo: nombre }],
     archivo: nombre, archivos: [nombre], error: null,
   });
   const lista = [
