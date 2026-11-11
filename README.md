@@ -65,6 +65,8 @@ Download `tuna-fonts_x.y.z_x64-setup.exe` from the [latest release](https://gith
 
 The installer isn't code-signed, so Windows SmartScreen may warn you the first time: click **More info → Run anyway**.
 
+From 0.1.1 on, every release is built by GitHub Actions straight from the tagged source ([`release.yml`](.github/workflows/release.yml)), and the SHA-256 of each file is listed in the release notes. There's also a portable `.zip`: unzip it and run `tuna-fonts.exe`. (0.1.0 was built locally.)
+
 ### Build it yourself
 
 You need [Node 22+](https://nodejs.org), [Rust](https://rustup.rs) stable and the WebView2 runtime (already included in Windows 11).
@@ -87,6 +89,14 @@ cargo test --manifest-path src-tauri/Cargo.toml
 ```
 
 The tests cover category detection and a full install → deactivate → activate cycle with a bundled test font and a throwaway registry key.
+
+### Making a release
+
+1. Bump `version` in `package.json` and `src-tauri/tauri.conf.json` (they must match).
+2. Write the notes in `.github/notas/vX.Y.Z.md`.
+3. Commit, then push a tag: `git tag vX.Y.Z && git push origin vX.Y.Z`.
+
+The workflow checks the tag matches the version, runs the tests, builds the installer and the portable zip, and leaves a **draft** release with the notes and SHA-256 sums. Review it and publish it by hand. Running the workflow manually (*Actions → release → Run workflow*) only builds and attaches the files to the run, without touching any release.
 
 ## How it's built
 
