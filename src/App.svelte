@@ -1,7 +1,7 @@
 <script>
   import { onMount } from "svelte";
   import { SvelteSet } from "svelte/reactivity";
-  import { Search, List, LayoutGrid, Folder, Trash2, X } from "@lucide/svelte";
+  import { Search, List, LayoutGrid, Folder, FolderOpen, Trash2, X, Heart, WifiOff, Layers, Type } from "@lucide/svelte";
 
   import Lateral from "./componentes/Lateral.svelte";
   import Controles from "./componentes/Controles.svelte";
@@ -62,6 +62,9 @@
 
   const bloqueada = (f) => f.origen === "sis" && (!ajustes.desbloqueadas || f.imprescindible);
   const motivo = (f) => (f.imprescindible ? t("candado.imprescindible") : t("candado.sistema"));
+  // Las del sistema con candado no se enseñan salvo que se pida en ajustes
+  // (en favoritas y colecciones sí: ahí las has puesto tú).
+  const visible = (f) => ajustes.verBloqueadas || !bloqueada(f);
   const enCarpeta = (f, ruta) => f.origen === "car" && f.archivos.some((a) => a.toLowerCase().startsWith(ruta.toLowerCase() + "\\"));
   const favs = $derived(new Set(biblioteca.favoritas));
 
@@ -71,7 +74,7 @@
     if (seccion === "favoritas") return l.filter((f) => favs.has(f.nombre));
     if (coleccion) return l.filter((f) => coleccion.fuentes.includes(f.nombre));
     if (carpeta) return l.filter((f) => enCarpeta(f, carpeta));
-    return l.filter((f) => f.origen !== "car");
+    return l.filter((f) => f.origen !== "car" && visible(f));
   });
   const ql = $derived(q.trim().toLowerCase());
   const lista = $derived(
@@ -95,7 +98,7 @@
     for (const f of enDescubrir ? descubrir.lista : base) c[f.categoria] = (c[f.categoria] ?? 0) + 1;
     return c;
   });
-  const instaladas = $derived(fuentes.lista.filter((f) => f.origen !== "car"));
+  const instaladas = $derived(fuentes.lista.filter((f) => f.origen !== "car" && visible(f)));
   const activasN = $derived(instaladas.filter((f) => f.activa || bloqueada(f)).length);
   const cuentaGoogle = $derived(
     descubrir.lista.length ? (descubrir.lista.length >= 1000 ? (Math.floor(descubrir.lista.length / 100) / 10).toLocaleString(locale()) + "k" : descubrir.lista.length) : "",
@@ -479,7 +482,7 @@
       {:else if descubrir.lista.length}
         <Vacio titulo={t("vacio.nada", { q: q.trim() })} texto={t("vacio.nadaGoogle")} boton={t("vacio.borrar")} onboton={() => (q = "")} />
       {:else if descubrir.error}
-        <Vacio titulo={t("g.sinRed")} texto={descubrir.error} boton={t("g.reintentar")} onboton={() => cargarCatalogo(true)} />
+        <Vacio icono={WifiOff} titulo={t("g.sinRed")} texto={descubrir.error} boton={t("g.reintentar")} onboton={() => cargarCatalogo(true)} />
       {:else}
         <Esqueleto />
       {/if}
@@ -487,7 +490,7 @@
       {#if fuentes.esqueleto}<Esqueleto />{/if}
     {:else if !lista.length}
       {#if seccion === "favoritas" && !ql && !base.length}
-        <Vacio glifo="♡" titulo={t("vacio.favTitulo")} texto={t("vacio.favTexto")} boton={t("vacio.favBoton")} onboton={() => irA("instaladas")} />
+        <Vacio icono={Heart} titulo={t("vacio.favTitulo")} texto={t("vacio.favTexto")} boton={t("vacio.favBoton")} onboton={() => irA("instaladas")} />
       {:else if ql}
         <Vacio
           titulo={t("vacio.nada", { q: q.trim() })}
@@ -500,7 +503,7 @@
           }}
         />
       {:else}
-        <Vacio titulo={t("vacio.lista")} texto={coleccion ? t("vacio.colTexto") : carpeta ? t("vacio.carTexto") : ""} />
+        <Vacio icono={coleccion ? Layers : carpeta ? FolderOpen : Type} titulo={t("vacio.lista")} texto={coleccion ? t("vacio.colTexto") : carpeta ? t("vacio.carTexto") : ""} />
       {/if}
     {:else if ajustes.vista === "cuadricula"}
       {#key seccion + cat}

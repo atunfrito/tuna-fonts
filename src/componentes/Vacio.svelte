@@ -1,32 +1,23 @@
 <script>
-  let { glifo = "?", titulo, texto, boton = "", onboton = null } = $props();
+  // Estado vacío: un icono fino y gris, el título, una frase y, si hace falta, un botón.
+  import { SearchX } from "@lucide/svelte";
+
+  let { icono = SearchX, titulo, texto, boton = "", onboton = null } = $props();
+  const Icono = $derived(icono);
 </script>
 
 <div class="vacio">
-  <span class="caja">{glifo}<span class="punto"></span></span>
+  <span class="icono"><Icono size={36} strokeWidth={1.5} /></span>
   <div class="txt">
     <span class="titulo">{titulo}</span>
-    <span class="texto">{texto}</span>
+    {#if texto}<span class="texto">{texto}</span>{/if}
   </div>
   {#if boton}<button type="button" onclick={onboton}>{boton}</button>{/if}
 </div>
 
 <style>
-  .vacio { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; text-align: center; padding-bottom: 60px; animation: tf-up 0.3s ease-out; }
-  .caja {
-    position: relative;
-    width: 84px;
-    height: 84px;
-    border-radius: 20px;
-    box-shadow: inset 0 0 0 2px var(--line2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font: 700 34px var(--sans);
-    letter-spacing: -0.04em;
-    color: var(--off);
-  }
-  .punto { position: absolute; right: 13px; bottom: 13px; width: 8px; height: 8px; border-radius: 50%; background: var(--red); }
+  .vacio { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; text-align: center; padding-bottom: 60px; animation: tf-up 0.3s ease-out; }
+  .icono { color: var(--ink3); display: flex; }
   .txt { display: flex; flex-direction: column; gap: 6px; max-width: 360px; }
   .titulo { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; }
   .texto { font-size: 13.5px; line-height: 1.5; color: var(--ink2); text-wrap: pretty; }

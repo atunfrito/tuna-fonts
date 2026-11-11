@@ -36,6 +36,7 @@
     { etiqueta: t("aj.instalar"), pista: t("aj.instalarHint"), valor: ajustes.instalarPara, elegir: (v) => (ajustes.instalarPara = v), opciones: [["usuario", t("aj.soloYo")], ["todos", t("aj.todos")]] },
     { etiqueta: t("aj.abrir"), pista: t("aj.abrirHint"), valor: ajustes.alAbrir, elegir: (v) => (ajustes.alAbrir = v), opciones: [["instaladas", t("sec.instaladas")], ["favoritas", t("sec.favoritas")]] },
     { etiqueta: t("aj.sistema"), pista: t("aj.sistemaHint"), valor: ajustes.desbloqueadas, elegir: desbloquear, opciones: [[false, t("aj.bloqueadas")], [true, t("aj.desbloquear")]] },
+    { etiqueta: t("aj.ver"), pista: t("aj.verHint"), valor: ajustes.verBloqueadas, elegir: (v) => (ajustes.verBloqueadas = v), opciones: [[false, t("aj.ocultas")], [true, t("aj.visibles")]] },
     { etiqueta: t("aj.idioma"), pista: "", valor: ajustes.idioma, elegir: (v) => (ajustes.idioma = v), opciones: [["es", "español"], ["en", "english"]] },
   ]);
 

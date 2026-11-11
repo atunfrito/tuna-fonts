@@ -184,6 +184,10 @@ export default {
   "aj.restaurar": "restore all system fonts",
   "aj.restaurarHint": "{n} deactivated by tuna-fonts",
   "aj.idioma": "language",
+  "aj.ver": "locked system fonts",
+  "aj.verHint": "the ones with a padlock: in the list or out of it",
+  "aj.ocultas": "hidden",
+  "aj.visibles": "shown",
 
   "atajos.hint": "click a shortcut to change it. esc to cancel.",
   "atajos.buscar": "search",

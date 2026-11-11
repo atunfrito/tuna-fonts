@@ -21,6 +21,8 @@ const POR_DEFECTO = {
   alAbrir: "instaladas",
   // Fuentes del sistema desbloqueadas (las imprescindibles, nunca).
   desbloqueadas: false,
+  // Ver en la lista las del sistema que llevan candado (por defecto, ocultas).
+  verBloqueadas: false,
   // Texto de prueba por defecto ("" = el de siempre del idioma).
   textoPrueba: "",
   atajos: { ...ATAJOS },

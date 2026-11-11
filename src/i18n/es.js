@@ -185,6 +185,10 @@ export default {
   "aj.restaurar": "restaurar todas las del sistema",
   "aj.restaurarHint": "{n} desactivadas por tuna-fonts",
   "aj.idioma": "idioma",
+  "aj.ver": "fuentes del sistema bloqueadas",
+  "aj.verHint": "las que llevan candado: en la lista o fuera de ella",
+  "aj.ocultas": "ocultas",
+  "aj.visibles": "visibles",
 
   "atajos.hint": "pulsa un atajo para cambiarlo. esc para cancelar.",
   "atajos.buscar": "buscar",
