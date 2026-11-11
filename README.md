@@ -61,7 +61,13 @@ Everything happens on your computer. The only network traffic is to Google Fonts
 
 ## Install
 
-There are no prebuilt releases yet, so for now you build it yourself. You need [Node 22+](https://nodejs.org), [Rust](https://rustup.rs) stable and the WebView2 runtime (already included in Windows 11).
+Download `tuna-fonts_x.y.z_x64-setup.exe` from the [latest release](https://github.com/atunfrito/tuna-fonts/releases/latest) and run it. It installs for your user only and doesn't need admin rights.
+
+The installer isn't code-signed, so Windows SmartScreen may warn you the first time: click **More info → Run anyway**.
+
+### Build it yourself
+
+You need [Node 22+](https://nodejs.org), [Rust](https://rustup.rs) stable and the WebView2 runtime (already included in Windows 11).
 
 ```bash
 git clone https://github.com/atunfrito/tuna-fonts
@@ -70,7 +76,7 @@ npm install
 npm run instalador
 ```
 
-The installer ends up in `src-tauri/target/release/bundle/nsis/`. It installs for your user only and doesn't need admin rights.
+The installer ends up in `src-tauri/target/release/bundle/nsis/`.
 
 Other commands:
 
@@ -119,7 +125,9 @@ App data (cache, deactivated fonts, system font backups) is kept in `%APPDATA%\e
 
 Las fuentes del sistema vienen **bloqueadas y ocultas** por defecto. Se pueden desbloquear en ajustes: pide permisos cada vez, guarda una copia antes de quitar nada y hay un botón para restaurarlas todas. Las imprescindibles para Windows no se tocan nunca.
 
-Todavía no hay versiones publicadas para descargar. Para compilarla hace falta Node 22+, Rust y WebView2:
+Para instalarla, baja `tuna-fonts_x.y.z_x64-setup.exe` de la [última versión](https://github.com/atunfrito/tuna-fonts/releases/latest) y ábrelo. Se instala solo para tu usuario, sin pedir permisos. Como el instalador no está firmado, Windows SmartScreen puede avisar la primera vez: «Más información → Ejecutar de todas formas».
+
+Para compilarla tú hace falta Node 22+, Rust y WebView2:
 
 ```bash
 npm install
