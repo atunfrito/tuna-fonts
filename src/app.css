@@ -1,0 +1,76 @@
+/* tuna-mono (ver tuna-mono.md). Los colores no se inventan: solo estos. */
+:root {
+  --win: #f7f6f3; --side: #efede9; --field: #ffffff;
+  --ink: #1b1a19; --ink2: rgba(27, 26, 25, 0.62); --ink3: rgba(27, 26, 25, 0.42);
+  --line: rgba(27, 26, 25, 0.08); --line2: rgba(27, 26, 25, 0.18);
+  --hov: rgba(27, 26, 25, 0.035); --chip: rgba(27, 26, 25, 0.06);
+  --sel: rgba(200, 16, 46, 0.055); --off: rgba(27, 26, 25, 0.22);
+  --red: #c8102e;
+  --ok: #2f7a4c; --warn: #b7791f;
+  --velo: rgba(15, 14, 13, 0.32);
+
+  --pastilla: 0 1px 2px rgba(0, 0, 0, 0.14);
+  --flotante: 0 12px 30px rgba(0, 0, 0, 0.2), 0 0 0 1px var(--line2);
+  --desliza: left 0.26s cubic-bezier(0.3, 1.25, 0.5, 1);
+
+  --sans: Archivo, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", Consolas, monospace;
+  --mano: "Gochi Hand", cursive;
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --win: #191816; --side: #1f1e1b; --field: #232220;
+  --ink: #eeece8; --ink2: rgba(238, 236, 232, 0.62); --ink3: rgba(238, 236, 232, 0.4);
+  --line: rgba(238, 236, 232, 0.07); --line2: rgba(238, 236, 232, 0.16);
+  --hov: rgba(238, 236, 232, 0.04); --chip: rgba(238, 236, 232, 0.08);
+  --sel: rgba(229, 56, 74, 0.08); --off: rgba(238, 236, 232, 0.2);
+  --red: #e5384a;
+  --pastilla: 0 1px 2px rgba(0, 0, 0, 0.3);
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; overflow: hidden; }
+body {
+  background: var(--win);
+  color: var(--ink);
+  font: 400 13px/1.35 var(--sans);
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  cursor: default;
+  transition: background-color 0.3s, color 0.3s;
+}
+input, textarea { user-select: text; }
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+a { color: var(--red); }
+input::placeholder { color: var(--ink3); }
+::selection { background: var(--red); color: #fff; }
+
+/* Sin aro ni subrayado al pulsar con el ratón: solo con teclado. */
+button:focus, a:focus, input:focus { outline: none; }
+button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+* { scrollbar-width: thin; scrollbar-color: var(--line2) transparent; }
+
+svg.lucide { display: block; flex: none; }
+
+.etiqueta {
+  font-size: 10.5px; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--ink3);
+}
+.marca { font-family: var(--mano); line-height: 1; letter-spacing: 0.01em; }
+.marca i { font-style: normal; color: var(--red); }
+.num { font-variant-numeric: tabular-nums; }
+
+@keyframes tf-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes tf-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes tf-key { 0% { opacity: 0; transform: scale(0.86) translateY(10px); } 60% { opacity: 1; transform: scale(1.02); } 100% { transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

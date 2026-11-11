@@ -1,0 +1,20 @@
+# Dependencias y compilados
+node_modules/
+dist/
+src-tauri/target/
+src-tauri/gen/
+
+# Secretos y entorno local
+.env
+.env.*
+*.pem
+*.pfx
+
+# Sistema y editores
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+.idea/
+*.log
+.claude/
