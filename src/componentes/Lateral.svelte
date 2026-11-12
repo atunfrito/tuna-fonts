@@ -125,8 +125,6 @@
           }}
           onblur={() => acabarNueva(false)}
         />
-      {:else if !colecciones.length}
-        <span class="vacio">{t("col.vacio")}</span>
       {/if}
     </div>
 
@@ -135,9 +133,6 @@
       {#each carpetas as c (c.ruta)}
         {@render item(c.nombre, seccion === "car:" + c.ruta, () => onseccion("car:" + c.ruta), c.cuenta, { titulo: c.ruta })}
       {/each}
-      {#if !carpetas.length}
-        <span class="vacio">{t("car.vacio")}</span>
-      {/if}
     </div>
 
     <div class="grupo">
@@ -218,7 +213,6 @@
   }
   .mas :global(svg) { display: block; }
   .mas:hover { background: var(--hov); color: var(--ink); }
-  .vacio { padding: 2px 10px 4px; font-size: 12px; line-height: 1.4; color: var(--ink3); opacity: 0.8; }
   .texto { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 1px; }
   .cuenta { margin-left: auto; font-size: 11.5px; color: var(--ink3); }
   .renombrar {

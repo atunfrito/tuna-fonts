@@ -59,7 +59,7 @@ fn mover(de: &Path, a: &Path) -> Result<(), String> {
     if fs::rename(de, a).is_ok() {
         return Ok(());
     }
-    fs::copy(de, a).map_err(|e| en_uso(e))?;
+    fs::copy(de, a).map_err(en_uso)?;
     if let Err(e) = fs::remove_file(de) {
         let _ = fs::remove_file(a);
         return Err(en_uso(e));

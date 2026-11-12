@@ -26,10 +26,11 @@
 <style>
   .cmp { flex: 1; min-height: 0; overflow-y: auto; padding: 0 24px 60px; display: flex; flex-direction: column; gap: 4px; animation: tf-up 0.25s ease-out; }
   .volver {
+    flex: none;
     align-self: flex-start;
     margin-bottom: 14px;
     height: 28px;
-    padding: 0 12px 0 8px;
+    padding: 0 13px 0 9px;
     border-radius: 999px;
     border: 0;
     background: var(--chip);
@@ -38,8 +39,10 @@
     display: flex;
     align-items: center;
     gap: 4px;
+    transition: background-color 0.15s;
   }
-  .una { display: flex; flex-direction: column; gap: 4px; padding: 14px 0 18px; border-top: 1px solid var(--line); }
+  .volver:hover { background: var(--line2); }
+  .una { flex: none; display: flex; flex-direction: column; gap: 4px; padding: 14px 0 18px; border-top: 1px solid var(--line); }
   .cab { display: flex; align-items: center; gap: 10px; }
   .nombre { font-size: 12px; font-weight: 600; }
   .meta { font-size: 11.5px; color: var(--ink3); }

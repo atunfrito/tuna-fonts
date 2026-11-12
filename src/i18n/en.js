@@ -99,8 +99,6 @@ export default {
   "col.seguro": "sure? delete",
   "col.eliminarPista": "delete collection (fonts are not touched)",
   "col.nuevaNombre": "collection name",
-  "col.vacio": "click + to create one",
-  "car.vacio": "click + to watch a folder",
   "car.anadir": "add folder",
   fuentesN: "{n} fonts",
 

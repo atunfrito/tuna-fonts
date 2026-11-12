@@ -51,10 +51,16 @@ pub struct Entorno {
 
 impl Entorno {
     pub fn real(datos: PathBuf) -> Self {
-        let windir = std::env::var_os("WINDIR").map(PathBuf::from).unwrap_or_else(|| PathBuf::from(r"C:\Windows"));
-        let local = std::env::var_os("LOCALAPPDATA").map(PathBuf::from).unwrap_or_default();
+        use windows_sys::Win32::UI::Shell::{FOLDERID_Fonts, FOLDERID_LocalAppData};
+        // Carpetas conocidas; las variables de entorno solo como último recurso.
+        let fuentes_sistema = crate::win::carpeta_conocida(&FOLDERID_Fonts).unwrap_or_else(|| {
+            std::env::var_os("WINDIR").map(PathBuf::from).unwrap_or_else(|| PathBuf::from(r"C:\Windows")).join("Fonts")
+        });
+        let local = crate::win::carpeta_conocida(&FOLDERID_LocalAppData)
+            .or_else(|| std::env::var_os("LOCALAPPDATA").map(PathBuf::from))
+            .unwrap_or_default();
         Entorno {
-            fuentes_sistema: windir.join("Fonts"),
+            fuentes_sistema,
             fuentes_usuario: local.join(r"Microsoft\Windows\Fonts"),
             clave_sistema: registro::CLAVE.into(),
             clave_usuario: registro::CLAVE.into(),

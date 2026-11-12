@@ -100,8 +100,6 @@ export default {
   "col.seguro": "¿seguro? eliminar",
   "col.eliminarPista": "eliminar colección (las fuentes no se tocan)",
   "col.nuevaNombre": "nombre de la colección",
-  "col.vacio": "pulsa + para crear una",
-  "car.vacio": "pulsa + para vigilar una carpeta",
   "car.anadir": "añadir carpeta",
   fuentesN: "{n} fuentes",
 

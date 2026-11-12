@@ -14,6 +14,30 @@ use windows_sys::Win32::{
     },
 };
 
+/// Ruta de una carpeta conocida (FOLDERID_*), pedida a Windows en vez de
+/// montarla a mano con variables de entorno. None si Windows no la da.
+pub fn carpeta_conocida(id: &windows_sys::core::GUID) -> Option<std::path::PathBuf> {
+    use std::os::windows::ffi::OsStringExt;
+    use windows_sys::Win32::{System::Com::CoTaskMemFree, UI::Shell::SHGetKnownFolderPath};
+    let mut ptr: windows_sys::core::PWSTR = std::ptr::null_mut();
+    // SAFETY: SHGetKnownFolderPath reserva la cadena; se copia y se libera
+    // siempre con CoTaskMemFree, también si falla (puede venir no nula).
+    unsafe {
+        let hr = SHGetKnownFolderPath(id, 0, std::ptr::null_mut(), &mut ptr);
+        let ruta = if hr == 0 && !ptr.is_null() {
+            let mut n = 0;
+            while *ptr.add(n) != 0 {
+                n += 1;
+            }
+            Some(std::ffi::OsString::from_wide(std::slice::from_raw_parts(ptr, n)).into())
+        } else {
+            None
+        };
+        CoTaskMemFree(ptr as *const _);
+        ruta
+    }
+}
+
 pub fn ancho(s: impl AsRef<OsStr>) -> Vec<u16> {
     s.as_ref().encode_wide().chain(Some(0)).collect()
 }

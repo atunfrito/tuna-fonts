@@ -43,20 +43,22 @@
 </div>
 
 <style>
-  .controles { display: flex; align-self: stretch; }
+  /* Botones redondeados como el resto de la app, centrados en la barra de 52 px. */
+  .controles { display: flex; align-items: center; gap: 2px; margin-right: 10px; }
   button {
-    width: 44px;
-    height: 100%;
+    width: 34px;
+    height: 28px;
     padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     border: 0;
+    border-radius: 7px;
     background: transparent;
     color: var(--ink3);
     transition: background-color 0.15s, color 0.15s;
   }
-  button:last-child { width: 46px; }
   /* Cerrar también en gris: el rojo es solo para el acento (docs/design.md). */
   button:hover { background: var(--chip); color: var(--ink); }
+  button:active { background: var(--line2); }
 </style>

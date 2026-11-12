@@ -111,6 +111,7 @@
 
 <style>
   .esp { flex: 1; min-height: 0; overflow-y: auto; padding: 4px 40px 70px 24px; display: flex; flex-direction: column; gap: 34px; animation: tf-up 0.25s ease-out; }
+  .esp > :global(*) { flex-shrink: 0; }
   .volver, .chip {
     height: 28px;
     padding: 0 12px 0 8px;

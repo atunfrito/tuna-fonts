@@ -3,8 +3,10 @@
 // src-tauri/src/lib.rs), así que el primer fotograma ya sale con el tema y el
 // idioma buenos, sin esperar a nada.
 import { LazyStore } from "@tauri-apps/plugin-store";
+import { version as versionPaquete } from "../../package.json";
 
-const inicio = window.__TUNA__ ?? { ajustes: {}, version: "0.1.0" };
+// Fuera de Tauri (vista previa en el navegador) la versión sale de package.json.
+const inicio = window.__TUNA__ ?? { ajustes: {}, version: versionPaquete };
 
 export const enTauri = "__TAURI_INTERNALS__" in window;
 export const version = inicio.version;

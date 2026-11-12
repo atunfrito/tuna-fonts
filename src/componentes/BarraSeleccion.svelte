@@ -40,7 +40,9 @@
     position: absolute;
     left: 50%;
     bottom: 20px;
-    transform: translateX(-50%);
+    /* translate y no transform: la animación tf-up usa transform y, si no, la
+       barra salía desplazada a la derecha y saltaba al centro al acabar. */
+    translate: -50% 0;
     z-index: 6;
     display: flex;
     align-items: center;
@@ -50,7 +52,7 @@
     background: var(--win);
     color: var(--ink);
     box-shadow: 0 14px 34px rgba(0, 0, 0, 0.16), 0 0 0 1px var(--line2);
-    animation: tf-up 0.18s ease-out;
+    animation: tf-up 0.22s cubic-bezier(0.2, 0.9, 0.3, 1);
     white-space: nowrap;
   }
   .cuenta { display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px 0 8px; border-radius: 9px; background: var(--chip); font: 600 12.5px var(--sans); }

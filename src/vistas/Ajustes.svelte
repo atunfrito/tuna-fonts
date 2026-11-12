@@ -117,12 +117,16 @@
     </div>
 
     <div class="cuerpo">
-      <button type="button" class="cerrar" title={t("close")} aria-label={t("close")} onclick={oncerrar}>
-        <X size={13} strokeWidth={2} />
-      </button>
+      <!-- Título y cerrar quedan fijos; solo se desplaza lo de debajo. -->
+      <div class="cab">
+        <h2>{pestana === "ajustes" ? t("settings") : pestana === "atajos" ? t("shortcuts") : ""}</h2>
+        <button type="button" class="cerrar" title={t("close")} aria-label={t("close")} onclick={oncerrar}>
+          <X size={13} strokeWidth={2} />
+        </button>
+      </div>
 
+      <div class="scroll">
       {#if pestana === "ajustes"}
-        <h2>{t("settings")}</h2>
         {#each filas as f (f.etiqueta)}
           <div class="fila">
             <span class="txt">
@@ -157,7 +161,6 @@
           <input bind:value={ajustes.textoPrueba} placeholder={t("defaultSample")} spellcheck="false" />
         </div>
       {:else if pestana === "atajos"}
-        <h2>{t("shortcuts")}</h2>
         <span class="pista menos">{t("atajos.hint")}</span>
         <div class="atajos">
           {#each atajos as a (a.que)}
@@ -214,6 +217,7 @@
           <span class="copy">© 2026 atunfrito · MIT</span>
         </div>
       {/if}
+      </div>
     </div>
   </div>
 </div>
@@ -253,11 +257,26 @@
   .tab:hover { background: var(--hov); }
   .tab.activa { background: var(--chip); color: var(--ink); font-weight: 600; }
   .tab.activa :global(svg) { opacity: 1; }
-  .cuerpo { position: relative; padding: 22px 26px 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+  .cuerpo { min-height: 0; display: flex; flex-direction: column; }
+  .cab { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 14px 10px 26px; }
+  /* La barra de desplazamiento va separada del borde redondeado y siempre en
+     su sitio (gutter estable), para que se vea y no mueva el contenido. */
+  .scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    margin: 0 6px 10px 0;
+    padding: 4px 14px 12px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .scroll { scrollbar-color: var(--off) transparent; }
+  /* Hijos directos de una columna con scroll: sin esto, los de alto fijo se aplastan. */
+  .scroll > :global(*) { flex-shrink: 0; }
   .cerrar {
-    position: absolute;
-    top: 12px;
-    right: 12px;
+    flex: none;
     width: 28px;
     height: 28px;
     border: 0;
@@ -268,13 +287,13 @@
     align-items: center;
     justify-content: center;
   }
-  .cerrar:hover { color: var(--ink); }
+  .cerrar:hover { background: var(--line2); color: var(--ink); }
   h2 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
   .fila { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
   .txt { display: flex; flex-direction: column; gap: 3px; }
   .eti { font-size: 13.5px; font-weight: 600; }
   .pista { font-size: 12px; color: var(--ink2); }
-  .pista.menos { font-size: 12.5px; margin-top: -6px; }
+  .pista.menos { font-size: 12.5px; }
   .prueba { display: flex; flex-direction: column; gap: 8px; }
   .prueba input { height: 32px; padding: 0 10px; border-radius: 8px; border: 0; box-shadow: 0 0 0 1px var(--line2); background: var(--field); font: 500 13px var(--sans); color: var(--ink); outline: 0; }
   .boton { flex: none; height: 28px; padding: 0 12px; border: 0; border-radius: 999px; background: var(--chip); color: var(--ink); font: 600 12px var(--sans); }
@@ -316,7 +335,7 @@
   .enlace { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 12.5px; color: var(--ink2); }
   .link { display: inline-flex; align-items: center; gap: 3px; padding: 0; border: 0; background: transparent; color: var(--ink); font: 600 12.5px var(--sans); text-decoration: underline; text-decoration-color: var(--line2); text-underline-offset: 3px; }
   .link:hover { text-decoration-color: var(--ink); }
-  .firma { margin-top: auto; display: flex; align-items: flex-end; justify-content: space-between; }
+  .firma { flex: none; margin-top: auto; display: flex; align-items: flex-end; justify-content: space-between; }
   .cueva { font-size: 18px; color: var(--red); }
   .copy { font: 400 10.5px var(--mono); color: var(--ink3); }
 </style>
