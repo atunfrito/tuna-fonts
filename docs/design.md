@@ -54,10 +54,11 @@ El rojo solo para: el punto/letra del logotipo, contadores de selección, avisos
 ## Voz
 Minúsculas, frases cortas, cercano, sin marketing. «nada con "comic sans"», «pulsa el corazón de cualquier fuente y la tendrás aquí.»
 
-## Reglas para la IA
-- No Fluent UI ni aspecto nativo de Windows. Ventana sin bordes con barra propia.
-- Nada de emojis. Iconos de trazo fino (Lucide, stroke 1.75–2).
-- Un solo acento rojo. No inventar colores.
-- Todos los selectores iguales (segmentado deslizante).
+## Principios
+Para cualquiera que toque la app:
+- Nada de Fluent UI ni del aspecto nativo de Windows. Ventana sin bordes, con barra de título propia.
+- Sin emojis. Iconos de trazo fino (Lucide, grosor 1.75–2).
+- Un único acento rojo. No se añaden colores fuera de esta guía.
+- Todos los selectores son iguales: segmentados, con la pastilla que se desliza.
 - La interfaz nunca compite con el contenido.
-- Tema claro y oscuro siempre. Español e inglés.
+- Siempre tema claro y oscuro, y español e inglés.

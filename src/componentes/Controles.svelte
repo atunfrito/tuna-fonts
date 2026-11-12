@@ -57,6 +57,6 @@
     transition: background-color 0.15s, color 0.15s;
   }
   button:last-child { width: 46px; }
-  /* Cerrar también en gris: el rojo es solo para el acento (tuna-mono.md). */
+  /* Cerrar también en gris: el rojo es solo para el acento (docs/design.md). */
   button:hover { background: var(--chip); color: var(--ink); }
 </style>

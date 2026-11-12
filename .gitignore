@@ -19,3 +19,4 @@ desktop.ini
 *.log
 .claude/
 winget/manifests/
+CLAUDE.md

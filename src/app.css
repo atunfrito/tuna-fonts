@@ -1,4 +1,4 @@
-/* tuna-mono (ver tuna-mono.md). Los colores no se inventan: solo estos. */
+/* tuna-mono (ver docs/design.md). Los colores no se inventan: solo estos. */
 :root {
   --win: #f7f6f3; --side: #efede9; --field: #ffffff;
   --ink: #1b1a19; --ink2: rgba(27, 26, 25, 0.62); --ink3: rgba(27, 26, 25, 0.42);
