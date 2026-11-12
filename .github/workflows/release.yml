@@ -1,11 +1,14 @@
-# Al subir un tag vX.Y.Z: compila el instalador NSIS y el zip portable desde el
-# código del tag, calcula sus SHA-256 y lo deja todo en una release BORRADOR con
-# las notas de .github/notas/vX.Y.Z.md. Se publica a mano después de revisarla.
+# Al subir un tag vX.Y.Z: compila el instalador NSIS firmado para el
+# actualizador y el zip portable desde el código del tag, genera latest.json y
+# las sumas SHA-256, y lo deja todo en una release BORRADOR con las notas de
+# .github/notas/vX.Y.Z.md. Se publica a mano después de revisarla.
 #
 # Lanzado a mano (workflow_dispatch) solo compila: sube los archivos como
-# artifact del run y no crea ni toca ninguna release.
+# artifact del run y no crea ni toca ninguna release. Si los secrets de firma
+# están puestos, también firma (para probar que la clave funciona).
 #
-# No hace falta ningún secret: tuna-fonts no lleva actualizador ni firma.
+# Secrets: TAURI_SIGNING_PRIVATE_KEY y TAURI_SIGNING_PRIVATE_KEY_PASSWORD
+# (la clave del actualizador; su parte pública está en src-tauri/tauri.conf.json).
 name: release
 
 on:
@@ -60,18 +63,35 @@ jobs:
       - name: Dependencias (versiones exactas del lockfile)
         run: npm ci
 
-      - name: Compilar el instalador
-        run: npm run instalador -- --ci
+      - name: Compilar el instalador (firmado si hay clave)
+        shell: pwsh
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          if ($env:TAURI_SIGNING_PRIVATE_KEY) {
+            # Solo aquí se generan los paquetes firmados (.sig): compilar en local no pide la clave.
+            npm run instalador -- --ci --config src-tauri/tauri.release.conf.json
+            "FIRMADO=1" >> $env:GITHUB_ENV
+          } elseif ($env:ES_TAG -eq "true") {
+            throw "faltan los secrets TAURI_SIGNING_PRIVATE_KEY y TAURI_SIGNING_PRIVATE_KEY_PASSWORD: sin firma, el actualizador no aceptaría esta versión"
+          } else {
+            Write-Warning "sin clave de firma: se compila sin los archivos del actualizador"
+            npm run instalador -- --ci
+            "FIRMADO=0" >> $env:GITHUB_ENV
+          }
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
 
       # Después de compilar: el build de Rust necesita la interfaz ya generada en dist/.
       - name: Tests
         run: cargo test --manifest-path src-tauri/Cargo.toml --locked
 
-      - name: Zip portable y SHA-256
+      - name: Zip portable, latest.json y SHA-256
         shell: pwsh
         run: |
           $v = $env:VERSION
-          $setup = Get-Item "src-tauri/target/release/bundle/nsis/tuna-fonts_${v}_x64-setup.exe"
+          $nombre = "tuna-fonts_${v}_x64-setup.exe"
+          $setup = Get-Item "src-tauri/target/release/bundle/nsis/$nombre"
 
           # Portable: el .exe con las licencias al lado, como el instalador.
           $dir = New-Item -ItemType Directory -Force "salida/portable/tuna-fonts"
@@ -82,8 +102,24 @@ jobs:
           Compress-Archive "$dir/*" "salida/tuna-fonts_${v}_x64-portable.zip"
           Copy-Item $setup salida/
 
+          # El actualizador lee latest.json de la última release publicada y solo
+          # instala el paquete si su firma cuadra con la clave pública de la app.
+          if ($env:FIRMADO -eq "1") {
+            $firma = (Get-Content "$($setup.FullName).sig" -Raw).Trim()
+            Copy-Item "$($setup.FullName).sig" salida/
+            $url = "https://github.com/$env:GITHUB_REPOSITORY/releases/download/v$v/$nombre"
+            $plataforma = @{ signature = $firma; url = $url }
+            $json = [ordered]@{
+              version   = $v
+              notes     = "https://github.com/$env:GITHUB_REPOSITORY/releases/tag/v$v"
+              pub_date  = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+              platforms = [ordered]@{ "windows-x86_64" = $plataforma; "windows-x86_64-nsis" = $plataforma }
+            } | ConvertTo-Json -Depth 5
+            [IO.File]::WriteAllText("$PWD/salida/latest.json", $json)
+          }
+
           Push-Location salida
-          $sumas = Get-ChildItem -File | Sort-Object Name | ForEach-Object {
+          $sumas = Get-ChildItem -File | Where-Object { $_.Extension -in ".exe", ".zip" } | Sort-Object Name | ForEach-Object {
             "{0}  {1}" -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower(), $_.Name
           }
           $sumas | Set-Content SHA256SUMS.txt -Encoding ascii
@@ -95,10 +131,7 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: tuna-fonts-${{ env.VERSION }}-${{ github.sha }}
-          path: |
-            salida/*.exe
-            salida/*.zip
-            salida/SHA256SUMS.txt
+          path: salida/*.*
           if-no-files-found: error
 
       - name: Release borrador

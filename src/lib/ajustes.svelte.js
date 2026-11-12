@@ -14,7 +14,8 @@ export const ATAJOS = { buscar: "Ctrl+F", todas: "Ctrl+A", alternar: "Space" };
 const POR_DEFECTO = {
   // null = el de Windows la primera vez; luego, el que elijas.
   tema: null,
-  idioma: "es",
+  // El de Windows la primera vez (es si está en español, en para lo demás); luego, el que elijas.
+  idioma: inicio.idiomaSistema ?? "en",
   // usuario | todos (pide permisos)
   instalarPara: "usuario",
   // instaladas | favoritas
@@ -23,6 +24,8 @@ const POR_DEFECTO = {
   desbloqueadas: false,
   // Ver en la lista las del sistema que llevan candado (por defecto, ocultas).
   verBloqueadas: false,
+  // Una consulta a GitHub al abrir para ver si hay versión nueva (desactivable).
+  buscarActualizaciones: true,
   // Texto de prueba por defecto ("" = el de siempre del idioma).
   textoPrueba: "",
   atajos: { ...ATAJOS },

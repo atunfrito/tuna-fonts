@@ -364,6 +364,28 @@ async fn google_instalar(app: AppHandle, familia: String) -> Result<Salida, Stri
     Ok(salida)
 }
 
+// ---- actualizaciones y enlaces ----
+
+/// La portable no se puede actualizar sola (el actualizador instalaría la app):
+/// en ella el aviso lleva a la página de la release. La instalada tiene su desinstalador al lado.
+#[tauri::command]
+fn es_portable() -> bool {
+    std::env::current_exe().ok().and_then(|e| e.parent().map(|d| !d.join("uninstall.exe").is_file())).unwrap_or(true)
+}
+
+/// Abre en el navegador una de estas direcciones fijas: la interfaz no puede pedir otra.
+#[tauri::command]
+fn abrir_web(cual: String) -> Result<(), String> {
+    let url = match cual.as_str() {
+        "release" => "https://github.com/atunfrito/tuna-fonts/releases/latest",
+        "fallo" => "https://github.com/atunfrito/tuna-fonts/issues/new/choose",
+        "tuna-dlp" => "https://github.com/atunfrito/tuna-dlp",
+        "repo" => "https://github.com/atunfrito/tuna-fonts",
+        _ => return Err(format!("dirección desconocida: {cual}")),
+    };
+    std::process::Command::new("explorer").arg(url).spawn().map(|_| ()).map_err(err)
+}
+
 // ---- arranque ----
 
 fn leer_ajustes(app: &AppHandle) -> Value {
@@ -402,6 +424,14 @@ fn windows_oscuro() -> bool {
         .unwrap_or(false)
 }
 
+/// Idioma de Windows para el primer arranque: "es" si la interfaz del sistema
+/// está en español (cualquier variante), "en" para todo lo demás.
+fn idioma_windows() -> &'static str {
+    // SAFETY: sin argumentos; devuelve el LANGID de la interfaz del usuario.
+    let langid = unsafe { windows_sys::Win32::Globalization::GetUserDefaultUILanguage() };
+    if langid & 0x3ff == 0x0a { "es" } else { "en" }
+}
+
 /// Con `--elevado <peticion.json>`: la copia con permisos de administrador.
 pub fn modo_elevado() -> Option<i32> {
     let mut args = std::env::args_os().skip(1);
@@ -423,6 +453,8 @@ pub fn run() {
         }))
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .invoke_handler(tauri::generate_handler![
             fuentes_guardadas,
             fuentes_actualizar,
@@ -436,6 +468,8 @@ pub fn run() {
             quitar_carpeta,
             google_catalogo,
             google_instalar,
+            es_portable,
+            abrir_web,
         ])
         .setup(|app| {
             let handle = app.handle().clone();
@@ -476,7 +510,11 @@ pub fn run() {
                 Some("light") => false,
                 _ => windows_oscuro(),
             };
-            let inicio = json!({ "ajustes": ajustes, "version": app.package_info().version.to_string() });
+            let inicio = json!({
+                "ajustes": ajustes,
+                "version": app.package_info().version.to_string(),
+                "idiomaSistema": idioma_windows(),
+            });
 
             WebviewWindowBuilder::new(app, "main", WebviewUrl::default())
                 .title("tuna-fonts")

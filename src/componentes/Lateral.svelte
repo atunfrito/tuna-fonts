@@ -1,6 +1,7 @@
 <script>
-  import { SlidersHorizontal, Sun, Moon } from "@lucide/svelte";
+  import { SlidersHorizontal, Sun, Moon, Plus } from "@lucide/svelte";
   import Segmentado from "./Segmentado.svelte";
+  import Actualizacion from "./Actualizacion.svelte";
   import { temaActual, ponerTema, version } from "../lib/ajustes.svelte.js";
   import { arrastre } from "../lib/arrastre.svelte.js";
   import { t } from "../lib/i18n.svelte.js";
@@ -28,6 +29,23 @@
     if (guardar) onrenombrar(renombrando, borrador);
     renombrando = null;
   }
+
+  // Colección nueva: campo en línea; solo se crea con Enter y un nombre.
+  let creando = $state(false);
+  let nombreNuevo = $state("");
+  let campoNuevo = $state();
+  $effect(() => {
+    if (creando && campoNuevo) campoNuevo.focus();
+  });
+  function empezarNueva() {
+    nombreNuevo = "";
+    creando = true;
+  }
+  function acabarNueva(crear) {
+    const n = nombreNuevo.trim();
+    creando = false;
+    if (crear && n) onnueva(n);
+  }
 </script>
 
 {#snippet item(texto, activo, ir, cuenta, extra = {})}
@@ -42,14 +60,19 @@
     data-coleccion={extra.coleccion}
     aria-current={activo ? "page" : undefined}
   >
-    {#if extra.mas}
-      <span class="mas">+</span>
-    {:else}
-      <span class="punto" class:rojo={extra.rojo}></span>
-    {/if}
+    <span class="punto" class:rojo={extra.rojo}></span>
     <span class="texto">{texto}</span>
     {#if cuenta != null && cuenta !== ""}<span class="cuenta num">{cuenta}</span>{/if}
   </button>
+{/snippet}
+
+{#snippet cabecera(texto, titulo, alPulsar)}
+  <div class="titulo con-mas">
+    <span>{texto}</span>
+    <button type="button" class="mas" onclick={alPulsar} title={titulo} aria-label={titulo}>
+      <Plus size={13} strokeWidth={2} />
+    </button>
+  </div>
 {/snippet}
 
 <aside>
@@ -67,7 +90,7 @@
     </div>
 
     <div class="grupo">
-      <span class="titulo">{t("grupo.colecciones")}</span>
+      {@render cabecera(t("grupo.colecciones"), t("col.nueva"), empezarNueva)}
       {#each colecciones as c (c.id)}
         {#if renombrando === c.id}
           <input
@@ -89,16 +112,31 @@
           })}
         {/if}
       {/each}
-      {@render item(t("col.nueva"), false, onnueva, "", { mas: true })}
+      {#if creando}
+        <input
+          class="renombrar"
+          bind:this={campoNuevo}
+          bind:value={nombreNuevo}
+          placeholder={t("col.nuevaNombre")}
+          aria-label={t("col.nueva")}
+          onkeydown={(e) => {
+            if (e.key === "Enter") acabarNueva(true);
+            if (e.key === "Escape") (e.stopPropagation(), acabarNueva(false));
+          }}
+          onblur={() => acabarNueva(false)}
+        />
+      {:else if !colecciones.length}
+        <span class="vacio">{t("col.vacio")}</span>
+      {/if}
     </div>
 
     <div class="grupo">
-      <span class="titulo">{t("grupo.carpetas")}</span>
+      {@render cabecera(t("grupo.carpetas"), t("car.anadir"), onanadirCarpeta)}
       {#each carpetas as c (c.ruta)}
         {@render item(c.nombre, seccion === "car:" + c.ruta, () => onseccion("car:" + c.ruta), c.cuenta, { titulo: c.ruta })}
       {/each}
       {#if !carpetas.length}
-        {@render item(t("car.anadir"), false, onanadirCarpeta, "", { mas: true })}
+        <span class="vacio">{t("car.vacio")}</span>
       {/if}
     </div>
 
@@ -111,6 +149,7 @@
   </nav>
 
   <div class="pie">
+    <Actualizacion />
     <span class="nota num">{pie}</span>
     <div class="fila">
       <button type="button" class="ajustes" onclick={onajustes}>
@@ -169,7 +208,17 @@
   .punto { width: 7px; height: 7px; flex: none; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--line2); }
   .activo .punto { background: var(--ink); box-shadow: none; }
   .activo .punto.rojo { background: var(--red); }
-  .mas { width: 7px; flex: none; text-align: center; font-size: 14px; line-height: 1; color: var(--ink3); }
+  /* La cabecera mide lo mismo que el botón y el hueco de abajo va fuera
+     (margen, no relleno), así el fondo del «+» queda centrado con el texto. */
+  .con-mas { display: flex; align-items: center; justify-content: space-between; height: 20px; padding: 0 2px 0 10px; margin-bottom: 4px; }
+  .mas {
+    flex: none; width: 20px; height: 20px; padding: 0; display: grid; place-items: center;
+    border: 0; border-radius: 5px; background: transparent; color: var(--ink3);
+    transition: background-color 0.15s, color 0.15s;
+  }
+  .mas :global(svg) { display: block; }
+  .mas:hover { background: var(--hov); color: var(--ink); }
+  .vacio { padding: 2px 10px 4px; font-size: 12px; line-height: 1.4; color: var(--ink3); opacity: 0.8; }
   .texto { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 1px; }
   .cuenta { margin-left: auto; font-size: 11.5px; color: var(--ink3); }
   .renombrar {
@@ -184,6 +233,7 @@
     outline: 0;
     width: 100%;
   }
+  .renombrar::placeholder { color: var(--ink3); font-weight: 500; }
   .pie { flex: none; display: flex; flex-direction: column; gap: 10px; padding: 10px 4px 0; }
   .nota { font-size: 11.5px; color: var(--ink3); padding: 0 6px; }
   .fila { display: flex; align-items: center; gap: 6px; }

@@ -10,6 +10,8 @@
   import ListaVirtual from "./componentes/ListaVirtual.svelte";
   import Fila from "./componentes/Fila.svelte";
   import Tarjeta from "./componentes/Tarjeta.svelte";
+  import { iniciarActualizador } from "./lib/actualizador.svelte.js";
+  import TarjetaGoogle from "./componentes/TarjetaGoogle.svelte";
   import FilaGoogle from "./componentes/FilaGoogle.svelte";
   import Vacio from "./componentes/Vacio.svelte";
   import Esqueleto from "./componentes/Esqueleto.svelte";
@@ -86,6 +88,29 @@
     ),
   );
   const instaladasNombres = $derived(new Set(fuentes.lista.map((f) => f.nombre.toLowerCase())));
+  // Favoritas de Google Fonts sin instalar (marcarlas no instala nada: es una lista de deseos).
+  const favGoogle = $derived(
+    seccion === "favoritas"
+      ? descubrir.lista.filter(
+          (g) =>
+            favs.has(g.nombre) &&
+            !instaladasNombres.has(g.nombre.toLowerCase()) &&
+            (!cat || g.categoria === cat) &&
+            (!ql || g.nombre.toLowerCase().includes(ql)) &&
+            filtro !== "activas",
+        )
+      : [],
+  );
+  // Lo que se pinta: en favoritas, las instaladas y las de Google por orden alfabético.
+  const listaVista = $derived(
+    favGoogle.length
+      ? [...lista, ...favGoogle.map((g) => ({ google: g, nombre: g.nombre }))].sort((a, b) => a.nombre.localeCompare(b.nombre))
+      : lista,
+  );
+  // El catálogo solo hace falta si hay favoritas que no están instaladas.
+  $effect(() => {
+    if (seccion === "favoritas" && biblioteca.favoritas.some((n) => !instaladasNombres.has(n.toLowerCase()))) cargarCatalogo();
+  });
   const listaGoogle = $derived.by(() => {
     const l = descubrir.lista.filter((g) => (!cat || g.categoria === cat) && (!ql || g.nombre.toLowerCase().includes(ql)));
     if (orden === "popularidad") return [...l].sort((a, b) => a.popularidad - b.popularidad);
@@ -131,10 +156,14 @@
     vistasGoogle = items;
     pedirVistas(items.map((g) => g.nombre), muestra);
   }
+  function alVerFav(items) {
+    vistasGoogle = items.filter((it) => it.google).map((it) => it.google);
+    if (vistasGoogle.length) pedirVistas(vistasGoogle.map((g) => g.nombre), muestra);
+  }
   $effect(() => {
     // Si cambia el texto de prueba, se pide solo lo que falte de lo que se ve.
     const m = muestra;
-    if (enDescubrir) pedirVistas(vistasGoogle.map((g) => g.nombre), m);
+    if (enDescubrir || seccion === "favoritas") pedirVistas(vistasGoogle.map((g) => g.nombre), m);
   });
 
   // ---- acciones ----
@@ -176,10 +205,9 @@
     avisar("ok", t("ok.aColeccion", { n: nombres.length === 1 ? nombres[0] : t("fuentesN", { n: nombres.length }), c: c.nombre }), "");
   }
 
-  function crearColeccion() {
-    const id = nuevaColeccion(t("col.nombre", { n: biblioteca.colecciones.length + 1 }));
+  function crearColeccion(nombre) {
+    const id = nuevaColeccion(nombre);
     irA("col:" + id);
-    renombrando = id;
   }
 
   let temporizadorBorrar;
@@ -242,6 +270,19 @@
     );
   }
 
+  // ---- Ctrl + rueda: tamaño de las muestras, no zoom de la ventana ----
+  // Con addEventListener porque hace falta passive: false para poder cancelar el zoom.
+  $effect(() => {
+    const rueda = (e) => {
+      if (!e.ctrlKey) return;
+      e.preventDefault();
+      const paso = e.deltaY < 0 ? 2 : -2;
+      ajustes.tamano = Math.min(96, Math.max(10, Math.round(ajustes.tamano) + paso));
+    };
+    window.addEventListener("wheel", rueda, { passive: false });
+    return () => window.removeEventListener("wheel", rueda);
+  });
+
   // ---- teclado ----
   function tecla(e) {
     if (ajustesEn || splash) return;
@@ -279,6 +320,7 @@
   // ---- arranque ----
   onMount(() => {
     iniciarBiblioteca();
+    iniciarActualizador();
     iniciarFuentes();
     precargar(muestra);
     if (!enTauri) return;
@@ -349,8 +391,42 @@
     {tamano}
     instalada={instaladasNombres.has(g.nombre.toLowerCase())}
     pct={descubrir.descargas[g.nombre]}
+    fav={favs.has(g.nombre)}
+    onfav={() => alternarFavorita(g.nombre)}
     oninstalar={() => instalarGoogle(g.nombre, ponerLista)}
   />
+{/snippet}
+
+{#snippet filaFav(it)}
+  {#if it.google}
+    <FilaGoogle
+      g={it.google}
+      {muestra}
+      {tamano}
+      sinInstalar
+      instalada={false}
+      pct={descubrir.descargas[it.nombre]}
+      fav={favs.has(it.nombre)}
+      onfav={() => alternarFavorita(it.nombre)}
+      oninstalar={() => instalarGoogle(it.nombre, ponerLista)}
+    />
+  {:else}
+    {@render fila(it)}
+  {/if}
+{/snippet}
+
+{#snippet tarjetaFav(it)}
+  {#if it.google}
+    <TarjetaGoogle
+      g={it.google}
+      pct={descubrir.descargas[it.nombre]}
+      fav={favs.has(it.nombre)}
+      onfav={() => alternarFavorita(it.nombre)}
+      oninstalar={() => instalarGoogle(it.nombre, ponerLista)}
+    />
+  {:else}
+    {@render tarjeta(it)}
+  {/if}
 {/snippet}
 
 <div class="ventana">
@@ -388,7 +464,7 @@
         </label>
         <div class="tamano" title={t("tamano")}>
           <span class="a pq">A</span>
-          <input class="rango" type="range" min="16" max="96" bind:value={ajustes.tamano} aria-label={t("tamano")} />
+          <input class="rango" type="range" min="10" max="96" bind:value={ajustes.tamano} aria-label={t("tamano")} />
           <span class="a gr">A</span>
           <span class="num n">{tamano}</span>
         </div>
@@ -414,7 +490,7 @@
 
     <div class="titulo">
       <span class="etiqueta">{cabecera}</span>
-      {#if vistaNormal}<span class="cuenta num">{enDescubrir ? listaGoogle.length : lista.length}</span>{/if}
+      {#if vistaNormal}<span class="cuenta num">{enDescubrir ? listaGoogle.length : listaVista.length}</span>{/if}
       <div class="derecha">
         {#if vistaNormal && !enDescubrir}
           <Segmentado
@@ -488,8 +564,8 @@
       {/if}
     {:else if fuentes.cargando}
       {#if fuentes.esqueleto}<Esqueleto />{/if}
-    {:else if !lista.length}
-      {#if seccion === "favoritas" && !ql && !base.length}
+    {:else if !listaVista.length}
+      {#if seccion === "favoritas" && !ql && !base.length && !biblioteca.favoritas.some((n) => descubrir.lista.some((g) => g.nombre === n))}
         <Vacio icono={Heart} titulo={t("vacio.favTitulo")} texto={t("vacio.favTexto")} boton={t("vacio.favBoton")} onboton={() => irA("instaladas")} />
       {:else if ql}
         <Vacio
@@ -507,11 +583,11 @@
       {/if}
     {:else if ajustes.vista === "cuadricula"}
       {#key seccion + cat}
-        <ListaVirtual items={lista} alto={146} minAncho={176} gap={10} padX={24} padTop={4} clave={(f) => f.nombre} fila={tarjeta} />
+        <ListaVirtual items={listaVista} alto={146} minAncho={176} gap={10} padX={24} padTop={4} clave={(f) => (f.google ? "g:" : "") + f.nombre} fila={tarjetaFav} alVer={alVerFav} />
       {/key}
     {:else}
       {#key seccion + cat}
-        <ListaVirtual items={lista} alto={Math.ceil(32 + tamano * 1.38)} clave={(f) => f.nombre} fila={fila} padBottom={80} />
+        <ListaVirtual items={listaVista} alto={Math.ceil(32 + tamano * 1.38)} clave={(f) => (f.google ? "g:" : "") + f.nombre} fila={filaFav} alVer={alVerFav} padBottom={80} />
       {/key}
     {/if}
 

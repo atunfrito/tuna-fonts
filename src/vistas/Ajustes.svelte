@@ -1,12 +1,31 @@
 <script>
   // Modal de ajustes con tres pestañas: ajustes · atajos · acerca de.
-  import { SlidersHorizontal, Keyboard, Info, X } from "@lucide/svelte";
+  import { SlidersHorizontal, Keyboard, Info, X, ArrowUpRight } from "@lucide/svelte";
   import Segmentado from "../componentes/Segmentado.svelte";
   import { ajustes, temaActual, ponerTema, version, ATAJOS } from "../lib/ajustes.svelte.js";
   import { t } from "../lib/i18n.svelte.js";
   import { avisar } from "../lib/avisos.svelte.js";
   import { respaldadas, restaurarSistema, fuentes } from "../lib/fuentes.svelte.js";
   import { comboDe } from "../lib/atajos.js";
+  import { nueva, buscarApp } from "../lib/actualizador.svelte.js";
+  import { enTauri } from "../lib/ajustes.svelte.js";
+
+  const abrirWeb = async (cual) => {
+    if (!enTauri) return;
+    const { invoke } = await import("@tauri-apps/api/core");
+    invoke("abrir_web", { cual }).catch(() => {});
+  };
+  const estadoAct = $derived(
+    nueva.estado === "buscando"
+      ? t("act.buscando")
+      : nueva.estado === "nada"
+        ? t("act.alDia")
+        : nueva.estado === "available" || nueva.estado === "downloading" || nueva.estado === "installing"
+          ? t("act.hay", { v: nueva.version })
+          : nueva.estado === "error"
+            ? t("act.sinRespuesta")
+            : t("aj.actHint"),
+  );
 
   let { pestana = $bindable(), oncerrar, cuentas } = $props();
 
@@ -37,6 +56,7 @@
     { etiqueta: t("aj.abrir"), pista: t("aj.abrirHint"), valor: ajustes.alAbrir, elegir: (v) => (ajustes.alAbrir = v), opciones: [["instaladas", t("sec.instaladas")], ["favoritas", t("sec.favoritas")]] },
     { etiqueta: t("aj.sistema"), pista: t("aj.sistemaHint"), valor: ajustes.desbloqueadas, elegir: desbloquear, opciones: [[false, t("aj.bloqueadas")], [true, t("aj.desbloquear")]] },
     { etiqueta: t("aj.ver"), pista: t("aj.verHint"), valor: ajustes.verBloqueadas, elegir: (v) => (ajustes.verBloqueadas = v), opciones: [[false, t("aj.ocultas")], [true, t("aj.visibles")]] },
+    { etiqueta: t("aj.buscarAct"), pista: t("aj.buscarActHint"), valor: ajustes.buscarActualizaciones, elegir: (v) => (ajustes.buscarActualizaciones = v), opciones: [[true, t("aj.si")], [false, t("aj.no")]] },
     { etiqueta: t("aj.idioma"), pista: "", valor: ajustes.idioma, elegir: (v) => (ajustes.idioma = v), opciones: [["es", "español"], ["en", "english"]] },
   ]);
 
@@ -78,7 +98,7 @@
     avisar("ok", t("ok.atajosRestaurados"), "");
   }
 
-  const novedades = $derived([t("nov.1"), t("nov.2"), t("nov.3"), t("nov.4")]);
+  const novedades = $derived([t("nov.1"), t("nov.2"), t("nov.3"), t("nov.4"), t("nov.5")]);
 </script>
 
 <svelte:window onkeydowncapture={tecla} />
@@ -112,6 +132,17 @@
             <Segmentado etiqueta={f.etiqueta} opciones={f.opciones.map(([valor, etiqueta]) => ({ valor, etiqueta }))} valor={f.valor} onelegir={f.elegir} />
           </div>
         {/each}
+        <div class="fila">
+          <span class="txt">
+            <span class="eti">{t("aj.act")}</span>
+            <span class="pista">{estadoAct}</span>
+          </span>
+          {#if nueva.estado === "available" && !nueva.cerrado}
+            <button type="button" class="boton" onclick={oncerrar}>{t("act.verAviso")}</button>
+          {:else}
+            <button type="button" class="boton" disabled={nueva.estado === "buscando" || !enTauri} onclick={() => buscarApp(true)}>{t("act.buscarAhora")}</button>
+          {/if}
+        </div>
         {#if nRespaldo > 0}
           <div class="fila">
             <span class="txt">
@@ -166,6 +197,17 @@
           {#each novedades as n (n)}
             <div class="linea"><span class="punto"></span><span>{n}</span></div>
           {/each}
+        </div>
+        <div class="enlaces">
+          <div class="enlace">
+            <span class="l">{t("acerca.masTuna")}</span>
+            <button type="button" class="link" onclick={() => abrirWeb("tuna-dlp")}>tuna-dlp<ArrowUpRight size={12} strokeWidth={2} /></button>
+          </div>
+          <div class="enlace">
+            <span class="l">{t("acerca.fallo")}</span>
+            <button type="button" class="link" onclick={() => abrirWeb("fallo")}>{t("acerca.abrirFallo")}<ArrowUpRight size={12} strokeWidth={2} /></button>
+          </div>
+          <!-- Aquí irá el enlace de donaciones (GitHub Sponsors o Ko-fi) cuando exista la cuenta. -->
         </div>
         <div class="firma">
           <span class="marca cueva">{t("madeIn")}</span>
@@ -270,6 +312,10 @@
   .nov { display: flex; flex-direction: column; gap: 6px; }
   .linea { display: flex; gap: 9px; align-items: baseline; font-size: 12.5px; line-height: 1.45; }
   .punto { flex: none; width: 5px; height: 5px; border-radius: 50%; background: var(--red); transform: translateY(-2px); }
+  .enlaces { display: flex; flex-direction: column; gap: 6px; padding-top: 12px; border-top: 1px solid var(--line); }
+  .enlace { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 12.5px; color: var(--ink2); }
+  .link { display: inline-flex; align-items: center; gap: 3px; padding: 0; border: 0; background: transparent; color: var(--ink); font: 600 12.5px var(--sans); text-decoration: underline; text-decoration-color: var(--line2); text-underline-offset: 3px; }
+  .link:hover { text-decoration-color: var(--ink); }
   .firma { margin-top: auto; display: flex; align-items: flex-end; justify-content: space-between; }
   .cueva { font-size: 18px; color: var(--red); }
   .copy { font: 400 10.5px var(--mono); color: var(--ink3); }

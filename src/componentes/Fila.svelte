@@ -8,13 +8,11 @@
   let { f, estilo, muestra, tamano, sel, fav, bloqueada, motivo, onsel, onabrir, onalternar, onfav, onarrastre } = $props();
 
   const on = $derived(f.activa || bloqueada);
-  const mb = $derived(Math.round(tamano * 0.32) + "px");
-  const mbBtn = $derived(Math.max(0, Math.round(tamano * 0.32) - 7) + "px");
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
 <div class="fila" class:sel onclick={onsel} ondblclick={onabrir} onpointerdown={onarrastre} data-familia={f.nombre}>
-  <Interruptor activa={f.activa} {bloqueada} titulo={bloqueada ? motivo : f.activa ? t("deactivate") : t("activate")} onclick={onalternar} abajo={mb} />
+  <Interruptor activa={f.activa} {bloqueada} titulo={bloqueada ? motivo : f.activa ? t("deactivate") : t("activate")} onclick={onalternar} />
   <div class="txt">
     <span class="nombre">{f.nombre}{#if f.error}<span class="roto"> · {t("err.ilegible")}</span>{/if}</span>
     <span
@@ -30,7 +28,6 @@
     type="button"
     class="ico corazon"
     class:fav
-    style:margin-bottom={mbBtn}
     title={fav ? t("fav.quitar") : t("fav.poner")}
     aria-label={fav ? t("fav.quitar") : t("fav.poner")}
     onclick={(e) => (e.stopPropagation(), onfav())}
@@ -41,7 +38,6 @@
   <button
     type="button"
     class="ico abrir"
-    style:margin-bottom={mbBtn}
     title={t("specimen")}
     aria-label={t("specimen")}
     onclick={(e) => (e.stopPropagation(), onabrir())}
@@ -55,7 +51,8 @@
   .fila {
     display: grid;
     grid-template-columns: 24px minmax(0, 1fr) 34px 34px;
-    align-items: end;
+    /* Tick, corazón y flecha centrados con toda la fila (nombre + muestra). */
+    align-items: center;
     gap: 0 12px;
     padding: 8px 18px 8px 24px;
     transition: background-color 0.12s;

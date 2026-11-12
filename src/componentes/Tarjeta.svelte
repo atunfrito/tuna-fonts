@@ -3,6 +3,7 @@
   import Interruptor from "./Interruptor.svelte";
   import Corazon from "./Corazon.svelte";
   import { t } from "../lib/i18n.svelte.js";
+  import { encajar } from "../lib/encajar.js";
 
   let { f, estilo, sel, fav, bloqueada, motivo, onsel, onabrir, onalternar, onfav, onarrastre } = $props();
   const on = $derived(f.activa || bloqueada);
@@ -18,7 +19,7 @@
     style:font-weight={estilo.peso}
     style:font-style={estilo.cursiva ? "italic" : "normal"}
   >
-    {aa}
+    <span use:encajar={{ texto: aa, familia: estilo.familia, peso: estilo.peso, cursiva: estilo.cursiva, base: 64, margen: 12 }}>{aa}</span>
   </div>
   <div class="pie">
     <Interruptor activa={f.activa} {bloqueada} titulo={bloqueada ? motivo : f.activa ? t("deactivate") : t("activate")} onclick={onalternar} tam={16} />
@@ -60,6 +61,7 @@
     overflow: hidden;
     white-space: nowrap;
   }
+  .aa span { display: block; line-height: 1; }
   .aa.off { color: var(--off); }
   .pie { display: flex; align-items: center; gap: 8px; }
   .nombre { flex: 1; min-width: 0; font-size: 12px; font-weight: 500; color: var(--ink2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

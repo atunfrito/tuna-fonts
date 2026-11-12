@@ -133,14 +133,19 @@
   .cab { display: flex; align-items: flex-end; gap: 16px; }
   .tit { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0; }
   .meta { font-size: 12px; color: var(--ink3); }
-  .nombre { font-size: 64px; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* El título no se recorta: las caligráficas tienen adornos que suben y bajan
+     mucho más que la línea. Interlineado amplio, sin overflow, y si no cabe a lo
+     ancho pasa a la línea siguiente. */
+  .nombre { font-size: 64px; line-height: 1.6; padding-top: 0.1em; overflow-wrap: anywhere; }
   .escala { display: flex; flex-direction: column; }
   .paso { display: grid; grid-template-columns: 40px minmax(0, 1fr); align-items: baseline; gap: 12px; padding: 4px 0; }
   .paso .n { font-size: 11px; color: var(--ink3); }
-  .linea { line-height: 1.38; padding-bottom: 0.18em; margin-bottom: -0.18em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .linea { line-height: 1.38; padding: 0.25em 0.15em 0.3em 0; margin: -0.25em 0 -0.3em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* La escala no se corta por la derecha: lo que no cabe pasa a la línea siguiente. */
+  .escala .linea { white-space: normal; overflow: visible; overflow-wrap: anywhere; line-height: 1.3; padding: 0.12em 0; margin: 0; }
   .juegos { display: flex; flex-direction: column; gap: 18px; }
   .juego { display: flex; flex-direction: column; gap: 4px; }
-  .chars { font-size: 30px; line-height: 1.3; letter-spacing: 0.02em; word-break: break-all; }
+  .chars { font-size: 30px; line-height: 1.5; letter-spacing: 0.02em; word-break: break-all; }
   .bloque { display: flex; flex-direction: column; gap: 8px; }
   .glifos { display: grid; grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); gap: 4px; }
   .glifo {

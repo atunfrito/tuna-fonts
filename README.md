@@ -22,11 +22,13 @@ Your fonts, tidy and at hand. No accounts, no ads, nothing sent anywhere.
 - **Activate and deactivate without deleting.** A deactivated font disappears from your apps but stays safe in tuna-fonts, ready to come back with one click.
 - **Install by dropping** `.ttf`, `.otf` or `.ttc` files on the window — just for you (no admin rights) or for every user.
 - **Discover** the whole Google Fonts catalog (about 1,900 families) and install any of them in one click.
-- **Favorites and collections** to keep the fonts for each project together, and a selection bar to act on many at once.
+- **Favorites and collections** to keep the fonts for each project together, and a selection bar to act on many at once. Favorites work as a wishlist too: heart a Google font in Discover and it waits in your favorites, not installed, until you want it.
 - **Specimen** with the real character map of the font (click a glyph to copy it), and **compare** 2 to 4 fonts side by side.
 - **Watched folders**: point it at a folder and its fonts are available while the app is open, without installing them.
 - **Categories** worked out from the font itself: sans serif, serif, script, display, monospace and other scripts.
-- Light and dark theme, Spanish and English, editable keyboard shortcuts.
+- **Ctrl + mouse wheel** changes the preview size anywhere in the list.
+- Light and dark theme, Spanish and English (it starts in your Windows language), editable keyboard shortcuts.
+- **Updates itself**: when there's a new version it tells you, and one click installs it. Only packages signed with the project's key are accepted.
 
 ### Type and see it everywhere
 
@@ -57,15 +59,25 @@ Fonts that come with Windows are **locked by default** and hidden from the list,
 
 ## Privacy
 
-Everything happens on your computer. The only network traffic is to Google Fonts (`fonts.google.com` and `fonts.gstatic.com`), and only when you open Discover or install from it. There is no telemetry, no account and no auto-updater phoning home.
+Everything happens on your computer. No telemetry, no account. The app only goes online for two things:
+
+- **Google Fonts** (`fonts.google.com` and `fonts.gstatic.com`), when you open Discover, install from it, or have Google fonts in your favorites.
+- **One request to GitHub on startup** to read `latest.json` from the latest release and see if there's a new version. Nothing is sent about you or your fonts. You can turn it off in *settings → check for updates on startup* (then it only checks when you press *check now*).
 
 ## Install
 
-Download `tuna-fonts_x.y.z_x64-setup.exe` from the [latest release](https://github.com/atunfrito/tuna-fonts/releases/latest) and run it. It installs for your user only and doesn't need admin rights.
+Download `tuna-fonts_x.y.z_x64-setup.exe` from the [latest release](https://github.com/atunfrito/tuna-fonts/releases/latest) and run it. It installs for your user only, in `%LOCALAPPDATA%\Programs\tuna-fonts`, and doesn't need admin rights. From then on it updates itself.
+
+Coming from 0.1.0 (which installed in `%LOCALAPPDATA%\tuna-fonts`)? Just run the new installer: it removes the old copy and keeps all your data — settings, favorites, collections, shortcuts, watched folders and your deactivated fonts.
+
+There's also a portable `.zip`: unzip it and run `tuna-fonts.exe`. It tells you when there's a new version but doesn't update itself.
 
 The installer isn't code-signed, so Windows SmartScreen may warn you the first time: click **More info → Run anyway**.
 
-From 0.1.1 on, every release is built by GitHub Actions straight from the tagged source ([`release.yml`](.github/workflows/release.yml)), and the SHA-256 of each file is listed in the release notes. There's also a portable `.zip`: unzip it and run `tuna-fonts.exe`. (0.1.0 was built locally.)
+Every release from 0.2.0 on is built by GitHub Actions straight from the tagged source ([`release.yml`](.github/workflows/release.yml)), signed for the updater, and the SHA-256 of each file is listed in the release notes. (0.1.0 was built locally.)
+
+**Stay in the loop:** *Watch → Custom → Releases* on this repository to get an email for each new version.
+**Found a bug?** [Open an issue](https://github.com/atunfrito/tuna-fonts/issues/new/choose) — English or Spanish.
 
 ### Build it yourself
 
@@ -96,7 +108,7 @@ The tests cover category detection and a full install → deactivate → activat
 2. Write the notes in `.github/notas/vX.Y.Z.md`.
 3. Commit, then push a tag: `git tag vX.Y.Z && git push origin vX.Y.Z`.
 
-The workflow checks the tag matches the version, runs the tests, builds the installer and the portable zip, and leaves a **draft** release with the notes and SHA-256 sums. Review it and publish it by hand. Running the workflow manually (*Actions → release → Run workflow*) only builds and attaches the files to the run, without touching any release.
+The workflow checks the tag matches the version, runs the tests, builds the installer (signed for the updater with the `TAURI_SIGNING_PRIVATE_KEY` and `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` secrets) and the portable zip, writes `latest.json`, and leaves a **draft** release with the notes and SHA-256 sums. Review it and publish it by hand: the updater only sees published releases. Publishing also sends the new version to winget (see [`winget/README.md`](winget/README.md)). Running the workflow manually (*Actions → release → Run workflow*) only builds and attaches the files to the run, without touching any release.
 
 ## How it's built
 
@@ -131,11 +143,16 @@ App data (cache, deactivated fonts, system font backups) is kept in `%APPDATA%\e
 - **Favoritas y colecciones** para tener juntas las fuentes de cada proyecto, y una barra de selección para hacer cosas con varias a la vez.
 - **Espécimen** con el mapa de caracteres real (clic en un carácter para copiarlo) y **comparar** de 2 a 4 fuentes.
 - **Carpetas vigiladas**: sus fuentes están disponibles mientras la app está abierta, sin instalarlas.
-- Tema claro y oscuro, español e inglés, y atajos de teclado editables.
+- Favoritas también como lista de deseos: el corazón en Descubrir la guarda en favoritas sin instalarla.
+- Control + rueda del ratón cambia el tamaño de las muestras.
+- Tema claro y oscuro, español e inglés (arranca en el idioma de Windows), y atajos de teclado editables.
+- Se actualiza sola: avisa de la versión nueva y se instala con un clic. Solo acepta paquetes firmados con la clave del proyecto.
 
 Las fuentes del sistema vienen **bloqueadas y ocultas** por defecto. Se pueden desbloquear en ajustes: pide permisos cada vez, guarda una copia antes de quitar nada y hay un botón para restaurarlas todas. Las imprescindibles para Windows no se tocan nunca.
 
-Para instalarla, baja `tuna-fonts_x.y.z_x64-setup.exe` de la [última versión](https://github.com/atunfrito/tuna-fonts/releases/latest) y ábrelo. Se instala solo para tu usuario, sin pedir permisos. Como el instalador no está firmado, Windows SmartScreen puede avisar la primera vez: «Más información → Ejecutar de todas formas».
+Para instalarla, baja `tuna-fonts_x.y.z_x64-setup.exe` de la [última versión](https://github.com/atunfrito/tuna-fonts/releases/latest) y ábrelo. Se instala solo para tu usuario, en `%LOCALAPPDATA%\Programs\tuna-fonts`, sin pedir permisos. Si tenías la 0.1.0, el instalador nuevo quita la vieja y conserva todos tus datos, también las fuentes desactivadas. Como el instalador no está firmado, Windows SmartScreen puede avisar la primera vez: «Más información → Ejecutar de todas formas».
+
+Lo único que sale a internet: Google Fonts cuando usas Descubrir, y una consulta a GitHub al abrir para ver si hay versión nueva (se desactiva en ajustes). Para enterarte de cada versión: *Watch → Custom → Releases*. ¿Algún fallo? [Abre un aviso](https://github.com/atunfrito/tuna-fonts/issues/new/choose), en español o en inglés.
 
 Para compilarla tú hace falta Node 22+, Rust y WebView2:
 

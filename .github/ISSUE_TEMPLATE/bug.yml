@@ -1,0 +1,81 @@
+name: Bug report
+description: Something doesn't work the way it should. / Algo no funciona como debería.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time. English or Spanish, whichever you prefer.
+        Gracias por tomarte el tiempo. En inglés o en español, como prefieras.
+
+  - type: input
+    id: version
+    attributes:
+      label: tuna-fonts version
+      description: shown at the bottom of the sidebar, e.g. 0.2.0
+      placeholder: "0.2.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: edition
+    attributes:
+      label: Installed or portable
+      options:
+        - installed
+        - portable
+    validations:
+      required: true
+
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version
+      description: Win + R → winver
+      placeholder: "Windows 11 24H2"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: language
+    attributes:
+      label: App language
+      options:
+        - English
+        - Español
+    validations:
+      required: true
+
+  - type: input
+    id: font
+    attributes:
+      label: Font involved (if it's about a font)
+      description: Its name, and where it came from (Windows, Google Fonts, a file you installed…).
+      placeholder: "Brittany Signature, installed by hand"
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: What you did
+      description: Step by step, so I can do the same.
+      placeholder: |
+        1. opened discover
+        2. searched for "inter"
+        3. pressed install
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened instead
+      description: Error messages and screenshots help a lot.
+    validations:
+      required: true
