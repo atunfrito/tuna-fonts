@@ -140,7 +140,8 @@
   .escala { display: flex; flex-direction: column; }
   .paso { display: grid; grid-template-columns: 40px minmax(0, 1fr); align-items: baseline; gap: 12px; padding: 4px 0; }
   .paso .n { font-size: 11px; color: var(--ink3); }
-  .linea { line-height: 1.38; padding: 0.25em 0.15em 0.3em 0; margin: -0.25em 0 -0.3em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* Recorta solo a lo ancho (para los «…»): por arriba y por abajo los adornos de las caligráficas pueden salirse. */
+  .linea { line-height: 1.38; white-space: nowrap; overflow-x: clip; overflow-y: visible; text-overflow: ellipsis; }
   /* La escala no se corta por la derecha: lo que no cabe pasa a la línea siguiente. */
   .escala .linea { white-space: normal; overflow: visible; overflow-wrap: anywhere; line-height: 1.3; padding: 0.12em 0; margin: 0; }
   .juegos { display: flex; flex-direction: column; gap: 18px; }

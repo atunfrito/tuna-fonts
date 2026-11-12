@@ -52,7 +52,8 @@
   .fila:hover { background: var(--hov); }
   .txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
   .nombre { font-size: 10.5px; color: var(--ink3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .muestra { line-height: 1.38; padding-bottom: 0.18em; margin-bottom: -0.18em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* Recorta solo a lo ancho (para los «…»): por arriba y por abajo los adornos de las caligráficas pueden salirse. */
+  .muestra { line-height: 1.38; padding-top: 0.2em; white-space: nowrap; overflow-x: clip; overflow-y: visible; text-overflow: ellipsis; }
   .falta { color: var(--ink2); font-weight: 600; }
   .accion { justify-self: end; }
   .ico {

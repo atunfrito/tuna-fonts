@@ -554,7 +554,7 @@
       />
     {:else if enDescubrir}
       {#if descubrir.lista.length && listaGoogle.length}
-        <ListaVirtual items={listaGoogle} alto={Math.ceil(34 + tamano * 1.38)} clave={(g) => g.nombre} fila={filaGoogle} alVer={alVerGoogle} padBottom={60} />
+        <ListaVirtual items={listaGoogle} alto={Math.ceil(34 + tamano * 1.58)} clave={(g) => g.nombre} fila={filaGoogle} alVer={alVerGoogle} padBottom={60} />
       {:else if descubrir.lista.length}
         <Vacio titulo={t("vacio.nada", { q: q.trim() })} texto={t("vacio.nadaGoogle")} boton={t("vacio.borrar")} onboton={() => (q = "")} />
       {:else if descubrir.error}
@@ -587,7 +587,7 @@
       {/key}
     {:else}
       {#key seccion + cat}
-        <ListaVirtual items={listaVista} alto={Math.ceil(32 + tamano * 1.38)} clave={(f) => (f.google ? "g:" : "") + f.nombre} fila={filaFav} alVer={alVerFav} padBottom={80} />
+        <ListaVirtual items={listaVista} alto={Math.ceil(32 + tamano * 1.58)} clave={(f) => (f.google ? "g:" : "") + f.nombre} fila={filaFav} alVer={alVerFav} padBottom={80} />
       {/key}
     {/if}
 

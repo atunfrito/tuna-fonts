@@ -62,12 +62,14 @@
   .txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
   .nombre { font-size: 10.5px; color: var(--ink3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .roto { color: var(--red); }
+  /* Recorta solo a lo ancho (para los «…»): por arriba y por abajo los adornos de las caligráficas pueden salirse. */
   .muestra {
     line-height: 1.38;
-    padding-bottom: 0.18em;
-    margin-bottom: -0.18em;
+    /* Aire encima para los adornos altos, sin pisar el nombre (la fila crece lo mismo en App.svelte). */
+    padding-top: 0.2em;
     white-space: nowrap;
-    overflow: hidden;
+    overflow-x: clip;
+    overflow-y: visible;
     text-overflow: ellipsis;
     color: var(--ink);
     transition: color 0.25s;

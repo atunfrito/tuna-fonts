@@ -9,6 +9,7 @@ import "@fontsource/jetbrains-mono/latin-500.css";
 import "@fontsource/gochi-hand/latin-400.css";
 import "./app.css";
 import App from "./App.svelte";
+import { iniciarAyudas } from "./lib/ayudas.js";
 
 // Que parezca una app y no una web: sin menú contextual del navegador (salvo
 // en los campos de texto, para poder pegar) ni atajos de recarga o impresión.
@@ -22,4 +23,5 @@ if (import.meta.env.PROD) {
   });
 }
 
+iniciarAyudas();
 mount(App, { target: document.getElementById("app") });

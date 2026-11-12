@@ -56,6 +56,7 @@
     justify-content: center;
   }
   .quitar:hover { background: var(--hov); color: var(--ink); }
-  .linea { line-height: 1.38; padding-bottom: 0.18em; margin-bottom: -0.18em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* Recorta solo a lo ancho (para los «…»): por arriba y por abajo los adornos de las caligráficas pueden salirse. */
+  .linea { line-height: 1.38; white-space: nowrap; overflow-x: clip; overflow-y: visible; text-overflow: ellipsis; }
   .parrafo { font-size: 15px; line-height: 1.55; color: var(--ink2); max-width: 70ch; }
 </style>
