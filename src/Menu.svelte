@@ -19,7 +19,7 @@
     const aplicar = (x) => {
       e = x;
       if (x.tema) document.documentElement.dataset.theme = x.tema;
-      document.documentElement.lang = x.idioma === "en" ? "en" : "es";
+      document.documentElement.lang = ["en", "zh"].includes(x.idioma) ? x.idioma : "es";
     };
     invoke("estado_bandeja").then(aplicar);
     const quitar = [

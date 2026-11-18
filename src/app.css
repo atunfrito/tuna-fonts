@@ -102,3 +102,41 @@ svg.lucide { display: block; flex: none; }
     transition-duration: 0.01ms !important;
   }
 }
+/* ---- Chino (zh) ----------------------------------------------------------
+   Windows 10 y 11 traen Microsoft YaHei también en instalaciones que no son
+   chinas, así que no se empaqueta ninguna fuente: basta con la pila. Noto Sans
+   SC queda detrás para quien lo tenga instalado.
+   1. Las etiquetas suben de 10.5px a 12px: a 10.5px los hanzi se ven como
+      manchas. Y el chino no tiene mayúsculas, así que el uppercase sobra.
+   2. El tracking de 0.1em sirve para el latín; en chino separa los trazos de
+      un mismo carácter, así que se aprieta a 0.02em.
+   3. La fuente china va primero en la pila. Si manda Archivo (latina), la caja
+      de línea usa su ascent/descent pero los hanzi los pinta la de respaldo, y
+      la tinta queda unos 2px por encima del centro.
+   4. Recuentos y números comparten la pila para que la línea base cuadre con
+      los hanzi de al lado.
+   ------------------------------------------------------------------------ */
+:root:lang(zh) {
+  --sans: "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans SC", "PingFang SC", Archivo, "Segoe UI", sans-serif;
+}
+:root:lang(zh) .etiqueta,
+:root:lang(zh) aside .titulo,
+:root:lang(zh) .barra .tit {
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+:root:lang(zh) .titulo,
+:root:lang(zh) h2,
+:root:lang(zh) .dato .n {
+  letter-spacing: normal;
+}
+:root:lang(zh) .cuenta,
+:root:lang(zh) .num {
+  font-family: var(--sans);
+}
+/* La tinta de los hanzi vive casi toda por encima de la línea base, así que con
+   el interlineado normal la fila se ve 1px alta. Caja de línea = caja em. */
+:root:lang(zh) .que {
+  line-height: 1;
+}

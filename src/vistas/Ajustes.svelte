@@ -78,7 +78,7 @@
     { etiqueta: t("aj.sistema"), pista: t("aj.sistemaHint"), valor: ajustes.desbloqueadas, elegir: desbloquear, opciones: [[false, t("aj.bloqueadas")], [true, t("aj.desbloquear")]] },
     { etiqueta: t("aj.ver"), pista: t("aj.verHint"), valor: ajustes.verBloqueadas, elegir: (v) => (ajustes.verBloqueadas = v), opciones: [[false, t("aj.ocultas")], [true, t("aj.visibles")]] },
     { etiqueta: t("aj.buscarAct"), pista: t("aj.buscarActHint"), valor: ajustes.buscarActualizaciones, elegir: (v) => (ajustes.buscarActualizaciones = v), opciones: [[true, t("aj.si")], [false, t("aj.no")]] },
-    { etiqueta: t("aj.idioma"), pista: "", valor: ajustes.idioma, elegir: ponerIdioma, opciones: [["es", "español"], ["en", "english"]] },
+    { etiqueta: t("aj.idioma"), pista: "", valor: ajustes.idioma, elegir: ponerIdioma, opciones: [["es", "español"], ["en", "english"], ["zh", "中文"]] },
   ]);
 
   // ---- atajos ----

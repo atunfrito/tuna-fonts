@@ -461,7 +461,12 @@ fn windows_oscuro() -> bool {
 fn idioma_windows() -> &'static str {
     // SAFETY: sin argumentos; devuelve el LANGID de la interfaz del usuario.
     let langid = unsafe { windows_sys::Win32::Globalization::GetUserDefaultUILanguage() };
-    if langid & 0x3ff == 0x0a { "es" } else { "en" }
+    // 0x0a = español, 0x04 = chino (simplificado y tradicional comparten primario).
+    match langid & 0x3ff {
+        0x0a => "es",
+        0x04 => "zh",
+        _ => "en",
+    }
 }
 
 /// Con `--elevado <peticion.json>`: la copia con permisos de administrador.
