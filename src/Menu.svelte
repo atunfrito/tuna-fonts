@@ -7,9 +7,11 @@
   import { AppWindow, Search, Compass, SlidersHorizontal, Power } from "@lucide/svelte";
   import es from "./i18n/es.js";
   import en from "./i18n/en.js";
+  import zh from "./i18n/zh.js";
 
   let e = $state({ estado: "", carpetas: 0, tema: "", idioma: "" });
-  const tr = (clave) => (e.idioma === "en" ? en : es)[clave] ?? es[clave] ?? clave;
+  const TEXTOS = { es, en, zh };
+  const tr = (clave) => (TEXTOS[e.idioma] ?? es)[clave] ?? es[clave] ?? clave;
   let abierto = $state(0);
 
   const hacer = (accion) => invoke("accion_bandeja", { accion });
