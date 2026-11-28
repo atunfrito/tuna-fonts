@@ -1,10 +1,11 @@
 <script>
-  // De 2 a 4 fuentes, una debajo de otra, con la misma muestra y un párrafo.
+  // De 2 a 4 fuentes, una debajo de otra, cada una con la muestra de su
+  // escritura (por eso se recibe `muestraDe` y no un texto), y un párrafo.
   import { ChevronLeft, X } from "@lucide/svelte";
   import { estiloDe } from "../lib/fuentes.svelte.js";
   import { t } from "../lib/i18n.svelte.js";
 
-  let { familias, muestra, tamano, onvolver, onquitar } = $props();
+  let { familias, muestraDe, tamano, onvolver, onquitar } = $props();
 </script>
 
 <div class="cmp">
@@ -17,7 +18,7 @@
         <span class="meta">{f.estilos.length} {f.estilos.length === 1 ? t("estilo") : t("estilos")} · {t("origen." + f.origen)}</span>
         <button type="button" class="quitar" title={t("removeCmp")} aria-label={t("removeCmp")} onclick={() => onquitar(f.nombre)}><X size={12} strokeWidth={2} /></button>
       </div>
-      <span class="linea" style:font-family={e.familia} style:font-weight={e.peso} style:font-style={e.cursiva ? "italic" : "normal"} style:font-size="{Math.max(tamano, 44)}px">{muestra}</span>
+      <span class="linea" style:font-family={e.familia} style:font-weight={e.peso} style:font-style={e.cursiva ? "italic" : "normal"} style:font-size="{Math.max(tamano, 44)}px">{muestraDe(f)}</span>
       <span class="parrafo" style:font-family={e.familia} style:font-weight={e.peso} style:font-style={e.cursiva ? "italic" : "normal"}>{t("paragraph")}</span>
     </div>
   {/each}

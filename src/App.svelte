@@ -27,7 +27,7 @@
   import { avisar } from "./lib/avisos.svelte.js";
   import { fuentes, iniciarFuentes, actualizarFuentes, alternar, desinstalar, ponerCategoria, mostrarEnExplorador, instalar, estiloDe, ponerLista, llamar } from "./lib/fuentes.svelte.js";
   import { biblioteca, iniciarBiblioteca, alternarFavorita, aFavoritas, nuevaColeccion, renombrar, eliminarColeccion, aColeccion, copiaColeccion } from "./lib/biblioteca.svelte.js";
-  import { descubrir, cargarCatalogo, pedirVistas, precargar, instalarGoogle } from "./lib/descubrir.svelte.js";
+  import { descubrir, cargarCatalogo, pedirVistasPorTexto, precargar, instalarGoogle } from "./lib/descubrir.svelte.js";
   import { arrastre, empezarArrastre } from "./lib/arrastre.svelte.js";
   import { comboDe } from "./lib/atajos.js";
 
@@ -98,8 +98,14 @@
   let splash = $state(!sinMovimiento);
   if (!sinMovimiento) setTimeout(() => (splash = false), 800);
 
-  const muestraDefecto = $derived(ajustes.textoPrueba.trim() || t("defaultSample"));
-  const muestra = $derived(muestraPropia || muestraDefecto);
+  // La muestra de cada fila: lo que escriba el usuario, si no lo de Ajustes y,
+  // si no, la de la propia fuente. El backend manda la frase de su escritura
+  // (japonesas con texto japonés, coreanas con coreano, tradicionales con
+  // tradicional) y vacía en las latinas, que enseñan el texto de la interfaz:
+  // con la frase de otro idioma media fila saldría con la fuente de reserva.
+  const muestraLatin = $derived(t("defaultSampleLatin"));
+  const muestraFija = $derived(muestraPropia || ajustes.textoPrueba.trim());
+  const muestraDe = (f) => muestraFija || f.muestra || muestraLatin;
   const tamano = $derived(ajustes.tamano);
   const pasoTamano = (d) => (ajustes.tamano = Math.min(96, Math.max(10, Math.round(ajustes.tamano) + d)));
 
@@ -206,20 +212,28 @@
   );
   const vistaNormal = $derived(!detalleF && !comparadas.length);
 
-  // Vistas previas de Descubrir: solo lo que se ve.
+  // Vistas previas de Descubrir: solo lo que se ve, y agrupadas por la muestra
+  // que le toca a cada familia (una latina con el texto de la interfaz, una
+  // japonesa con el japonés…). Si no, se le piden ideogramas que no tiene y la
+  // fila sale con la fuente de reserva.
   let vistasGoogle = [];
+  function pedirVistasGoogle(items) {
+    if (!items.length) return;
+    pedirVistasPorTexto(items, muestraDe);
+  }
   function alVerGoogle(items) {
     vistasGoogle = items;
-    pedirVistas(items.map((g) => g.nombre), muestra);
+    pedirVistasGoogle(items);
   }
   function alVerFav(items) {
     vistasGoogle = items.filter((it) => it.google).map((it) => it.google);
-    if (vistasGoogle.length) pedirVistas(vistasGoogle.map((g) => g.nombre), muestra);
+    pedirVistasGoogle(vistasGoogle);
   }
   $effect(() => {
     // Si cambia el texto de prueba, se pide solo lo que falte de lo que se ve.
-    const m = muestra;
-    if (enDescubrir || seccion === "favoritas") pedirVistas(vistasGoogle.map((g) => g.nombre), m);
+    // (`muestraFija` se lee aquí a propósito: es la dependencia que dispara el efecto.)
+    const m = muestraFija;
+    if (enDescubrir || seccion === "favoritas") pedirVistasGoogle(vistasGoogle);
   });
 
   // ---- acciones ----
@@ -419,7 +433,7 @@
     iniciarBiblioteca();
     iniciarActualizador();
     iniciarFuentes();
-    precargar(muestra);
+    precargar(muestraDe);
     if (!enTauri) return;
     llamar("carpetas").then((l) => (carpetas = l));
     // Lo que se pide desde el menú de la bandeja (la ventana ya está a la vista).
@@ -479,7 +493,7 @@
   <Fila
     {f}
     estilo={estiloDe(f)}
-    {muestra}
+    muestra={muestraDe(f)}
     {tamano}
     sel={sel.has(f.nombre)}
     fav={favs.has(f.nombre)}
@@ -514,7 +528,7 @@
 {#snippet filaGoogle(g)}
   <FilaGoogle
     {g}
-    {muestra}
+    muestra={muestraDe(g)}
     {tamano}
     instalada={instaladasNombres.has(g.nombre.toLowerCase())}
     pct={descubrir.descargas[g.nombre]}
@@ -529,7 +543,7 @@
   {#if it.google}
     <FilaGoogle
       g={it.google}
-      {muestra}
+      muestra={muestraDe(it.google)}
       {tamano}
       sinInstalar
       instalada={false}
@@ -673,7 +687,7 @@
     {#if vistaG}
       <VistaGoogle
         g={vistaG}
-        {muestra}
+        muestra={muestraDe(vistaG)}
         volver={enDescubrir ? t("sec.descubrir") : t("favorites")}
         instalada={instaladasNombres.has(vistaG.nombre.toLowerCase())}
         pct={descubrir.descargas[vistaG.nombre]}
@@ -685,7 +699,7 @@
     {:else if detalleF}
       <Especimen
         f={detalleF}
-        {muestra}
+        muestra={muestraDe(detalleF)}
         fav={favs.has(detalleF.nombre)}
         bloqueada={bloqueada(detalleF)}
         volver={seccion === "favoritas" ? t("favorites") : coleccion ? coleccion.nombre : t("sec.instaladas")}
@@ -696,7 +710,7 @@
     {:else if comparadas.length}
       <Comparar
         familias={comparadas}
-        {muestra}
+        muestraDe={muestraDe}
         {tamano}
         onvolver={() => (comparar = [])}
         onquitar={(n) => (comparar = comparar.length <= 2 ? [] : comparar.filter((x) => x !== n))}

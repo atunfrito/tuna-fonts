@@ -24,8 +24,8 @@ pub struct Cache {
     pub familias: Vec<Familia>,
 }
 
-// 3: las caras guardan sus funciones OpenType (rasgos).
-const VERSION: u32 = 3;
+// 5: cada cara dice qué muestra sabe escribir (muestra), no solo si trae ideogramas.
+const VERSION: u32 = 5;
 
 fn sello(ruta: &Path) -> Option<(u64, u64)> {
     let m = fs::metadata(ruta).ok()?;

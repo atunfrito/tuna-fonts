@@ -14,6 +14,8 @@ export default {
   typeSomething: "escribe algo",
   resetText: "volver al texto de siempre",
   defaultSample: "El veloz atún salta sobre el perro perezoso",
+  // Muestra para las fuentes que no traen ideogramas (ver App.svelte).
+  defaultSampleLatin: "El veloz atún salta sobre el perro perezoso",
   addAnother: "añadir otra",
   stopWatching: "dejar de vigilar",
   folderInfo: "estas fuentes no están instaladas en windows. tuna-fonts las activa mientras está abierta, y lo que metas en la carpeta aparece aquí solo.",

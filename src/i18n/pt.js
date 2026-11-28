@@ -13,6 +13,8 @@ export default {
   typeSomething: "digite algo",
   resetText: "voltar ao texto padrão",
   defaultSample: "The quick tuna jumps over the lazy dog",
+  // Muestra para las fuentes que no traen ideogramas (ver App.svelte).
+  defaultSampleLatin: "The quick tuna jumps over the lazy dog",
   addAnother: "adicionar outra",
   stopWatching: "parar de monitorar",
   folderInfo: "estas fontes não estão instaladas no windows. o tuna-fonts as ativa enquanto está aberto, e tudo o que você colocar na pasta aparece aqui.",

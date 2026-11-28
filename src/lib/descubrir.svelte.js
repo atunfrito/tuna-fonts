@@ -64,13 +64,27 @@ export function pedirVistas(familias, texto) {
   }
 }
 
-/** En segundo plano tras abrir: el catálogo y las vistas de las más populares. */
-export function precargar(texto) {
+/** Pide las vistas de estas familias agrupadas por la muestra que le toca a cada
+ *  una (un lote por texto distinto): las latinas con el texto de la interfaz, la
+ *  japonesa con el japonés… `textoDe(g)` es quien lo decide. */
+export function pedirVistasPorTexto(familias, textoDe) {
+  const grupos = new Map();
+  for (const g of familias) {
+    const texto = textoDe(g);
+    if (!grupos.has(texto)) grupos.set(texto, []);
+    grupos.get(texto).push(g.nombre);
+  }
+  for (const [texto, lote] of grupos) pedirVistas(lote, texto);
+}
+
+/** En segundo plano tras abrir: el catálogo y las vistas de las más populares.
+ *  `textoDe` es el mismo que el de `pedirVistasPorTexto`. */
+export function precargar(textoDe) {
   const idle = window.requestIdleCallback ?? ((f) => setTimeout(f, 1200));
   idle(() =>
     cargarCatalogo().then(() => {
-      const top = [...descubrir.lista].sort((a, b) => a.popularidad - b.popularidad).slice(0, 45).map((f) => f.nombre);
-      pedirVistas(top, texto);
+      const top = [...descubrir.lista].sort((a, b) => a.popularidad - b.popularidad).slice(0, 45);
+      pedirVistasPorTexto(top, textoDe);
     }),
   );
 }
